@@ -63,20 +63,40 @@ exports.cancelar = (req, res) => {
 };
 
 // Função para Listar os Agendamentos do Usuário Logado
+// Função para Listar os Agendamentos do Usuário Logado (Com Lazy Update)
 exports.listarMeus = (req, res) => {
     const usuario_id = req.usuario.id;
 
-    // Usamos um JOIN para trazer o nome do serviço junto com os dados do agendamento
-    const query = `
-        SELECT a.id, a.data_hora, a.status, s.nome as servico_nome
-        FROM agendamentos a
-        LEFT JOIN servicos s ON a.servico_id = s.id
-        WHERE a.usuario_id = ?
-        ORDER BY a.data_hora DESC
+    // 1. Pegar a data e hora atual e ajustar para o fuso horário local
+    // O input 'datetime-local' do HTML salva no formato YYYY-MM-DDTHH:mm
+    const agora = new Date();
+    const tzOffset = agora.getTimezoneOffset() * 60000; // Diferença de fuso em milissegundos
+    const dataAtualLocal = new Date(agora.getTime() - tzOffset).toISOString().slice(0, 16);
+
+    // 2. Lazy Update: Atualiza para 'Concluido' tudo o que já passou da data atual
+    const updateQuery = `
+        UPDATE agendamentos
+        SET status = 'Concluido'
+        WHERE usuario_id = ? AND status = 'Agendado' AND data_hora < ?
     `;
 
-    db.all(query, [usuario_id], (err, agendamentos) => {
-        if (err) return res.status(500).json({ erro: 'Erro ao buscar agendamentos.' });
-        res.json(agendamentos);
+    db.run(updateQuery, [usuario_id, dataAtualLocal], (err) => {
+        if (err) {
+            console.error('Erro ao fazer a atualização preguiçosa (Lazy Update):', err);
+        }
+
+        // 3. Após atualizar (ou se não houver nada a atualizar), busca os dados reais
+        const selectQuery = `
+            SELECT a.id, a.data_hora, a.status, s.nome as servico_nome
+            FROM agendamentos a
+            LEFT JOIN servicos s ON a.servico_id = s.id
+            WHERE a.usuario_id = ?
+            ORDER BY a.data_hora DESC
+        `;
+
+        db.all(selectQuery, [usuario_id], (err, agendamentos) => {
+            if (err) return res.status(500).json({ erro: 'Erro ao buscar agendamentos.' });
+            res.json(agendamentos);
+        });
     });
 };
