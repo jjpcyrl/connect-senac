@@ -100,3 +100,22 @@ exports.listarMeus = (req, res) => {
         });
     });
 };
+
+
+// Função para a Coordenação: Listar TODOS os agendamentos do sistema
+exports.listarTodos = (req, res) => {
+    // JOIN triplo: Trazemos os dados do Agendamento, o Nome do Serviço e o Nome do Cliente (Usuário)
+    const query = `
+        SELECT a.id, a.data_hora, a.status, s.nome as servico_nome, u.nome as cliente_nome, u.telefone
+        FROM agendamentos a
+        INNER JOIN servicos s ON a.servico_id = s.id
+        INNER JOIN usuarios u ON a.usuario_id = u.id
+        ORDER BY a.data_hora DESC
+    `;
+
+    db.all(query, [], (err, agendamentos) => {
+        if (err) return res.status(500).json({ erro: 'Erro ao buscar todos os agendamentos.' });
+        res.json(agendamentos);
+    });
+};
+
