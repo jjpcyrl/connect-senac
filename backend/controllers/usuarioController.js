@@ -2,6 +2,7 @@
 const supabase = require('../config/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto'); // Biblioteca nativa do Node.js para criptografia
 
 // 1. LÓGICA DE REGISTO (CADASTRO)
 exports.registrar = async (req, res) => {
@@ -98,5 +99,104 @@ exports.login = async (req, res) => {
     } catch (error) {
         console.error('Erro no login:', error.message);
         res.status(500).json({ erro: 'Erro interno ao realizar o login.' });
+    }
+};
+// backend/controllers/usuarioController.js
+
+
+// ... (mantenha as funções registrar e login intactas) ...
+
+// 3. SOLICITAR RECUPERAÇÃO DE PALAVRA-PASSE
+exports.solicitarRecuperacao = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        // 1. Verificar se o utilizador existe
+        const { data: utilizador, error: erroBusca } = await supabase
+            .from('usuarios')
+            .select('id, nome')
+            .eq('email', email)
+            .maybeSingle();
+
+        if (erroBusca) throw erroBusca;
+        if (!utilizador) {
+            // Por segurança, não dizemos se o e-mail existe ou não. Devolvemos sucesso sempre.
+            return res.json({ mensagem: 'Se o e-mail existir, receberá um link de recuperação.' });
+        }
+
+        // 2. Gerar Token Aleatório (64 caracteres Hexadecimais)
+        const resetToken = crypto.randomBytes(32).toString('hex');
+
+        // 3. Definir expiração (ex: 1 hora a partir de agora)
+        const expiraEm = new Date();
+        expiraEm.setHours(expiraEm.getHours() + 1);
+
+        // 4. Guardar o token e a expiração no banco
+        await supabase
+            .from('usuarios')
+            .update({
+                reset_token: resetToken,
+                reset_token_expires: expiraEm.toISOString()
+            })
+            .eq('id', utilizador.id);
+
+        // 5. Simular o envio de E-mail (No mundo real, usaríamos o Nodemailer aqui)
+        // Como o Front-end e Back-end dividem a mesma origem, montamos o link dinamicamente
+        const linkRecuperacao = `${req.protocol}://${req.get('host')}/redefinir-senha.html?token=${resetToken}`;
+
+        console.log(`\n📧 [SIMULAÇÃO DE E-MAIL]`);
+        console.log(`Para: ${email}`);
+        console.log(`Assunto: Recuperação de Palavra-passe - Connect Senac`);
+        console.log(`Link: ${linkRecuperacao}\n`);
+
+        res.json({ mensagem: 'Se o e-mail existir, receberá um link de recuperação.' });
+
+    } catch (error) {
+        console.error('Erro na solicitação de recuperação:', error.message);
+        res.status(500).json({ erro: 'Erro interno do servidor.' });
+    }
+};
+
+// 4. REDEFINIR A PALAVRA-PASSE
+exports.redefinirSenha = async (req, res) => {
+    const { token, nova_senha, confirmar_senha } = req.body;
+
+    if (nova_senha !== confirmar_senha) {
+        return res.status(400).json({ erro: 'As palavras-passe não coincidem.' });
+    }
+
+    try {
+        // 1. Procurar o utilizador que tem este token e verificar se ainda é válido (data > agora)
+        const agora = new Date().toISOString();
+        const { data: utilizador, error: erroBusca } = await supabase
+            .from('usuarios')
+            .select('id')
+            .eq('reset_token', token)
+            .gt('reset_token_expires', agora) // Valida se ainda não expirou
+            .maybeSingle();
+
+        if (erroBusca || !utilizador) {
+            return res.status(400).json({ erro: 'O link de recuperação é inválido ou já expirou.' });
+        }
+
+        // 2. Gerar o Hash da nova palavra-passe
+        const salt = await bcrypt.genSalt(10);
+        const senhaHash = await bcrypt.hash(nova_senha, salt);
+
+        // 3. Atualizar a palavra-passe e limpar os tokens de recuperação
+        await supabase
+            .from('usuarios')
+            .update({
+                senha: senhaHash,
+                reset_token: null,
+                reset_token_expires: null
+            })
+            .eq('id', utilizador.id);
+
+        res.json({ mensagem: 'Palavra-passe alterada com sucesso! Já pode fazer login.' });
+
+    } catch (error) {
+        console.error('Erro ao redefinir palavra-passe:', error.message);
+        res.status(500).json({ erro: 'Erro interno ao redefinir a palavra-passe.' });
     }
 };

@@ -6,5 +6,7 @@ const usuarioController = require('../controllers/usuarioController');
 // Definindo os Endpoints
 router.post('/registrar', usuarioController.registrar);
 router.post('/login', usuarioController.login);
+router.post('/esqueci-senha', usuarioController.solicitarRecuperacao);
+router.post('/redefinir-senha', usuarioController.redefinirSenha);
 
 module.exports = router;

@@ -1,7 +1,9 @@
 // backend/middlewares/authMiddleware.js
+// backend/middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
+const supabase = require('../config/database'); // Importação do banco
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
     const token = req.header('Authorization');
 
     if (!token) {
@@ -12,11 +14,24 @@ module.exports = (req, res, next) => {
         const tokenLimpo = token.replace('Bearer ', '');
         const decodificado = jwt.verify(tokenLimpo, process.env.JWT_SECRET || 'chave_super_secreta_senac');
 
-        // Pendura os dados do usuário (incluindo id e perfil) na requisição
-        req.usuario = decodificado;
+        // CONSULTA DE SEGURANÇA EM TEMPO REAL:
+        const { data: usuario, error } = await supabase
+            .from('usuarios')
+            .select('is_bloqueado')
+            .eq('id', decodificado.id)
+            .single();
 
+        if (error || !usuario) {
+            return res.status(401).json({ erro: 'Usuário não encontrado no sistema.' });
+        }
+
+        if (usuario.is_bloqueado) {
+            return res.status(403).json({ erro: 'Sua conta foi suspensa. Entre em contato com a coordenação.' });
+        }
+
+        req.usuario = decodificado;
         next();
     } catch (err) {
-        return res.status(401).json({ erro: 'Sessão expirada ou token inválido. Faça login novamente.' });
+        return res.status(401).json({ erro: 'Sessão expirada ou inválida. Faça login novamente.' });
     }
 };
