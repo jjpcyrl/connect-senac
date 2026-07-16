@@ -13,7 +13,7 @@ document.getElementById('btnSair').addEventListener('click', () => {
 
 // Instância do Modal do Bootstrap para controlo via JS
 const modalAgendamento = new bootstrap.Modal(document.getElementById('modalAgendamento'));
-const modalFeedback = new bootstrap.Modal(document.getElementById('modalFeedback')); 
+const modalFeedback = new bootstrap.Modal(document.getElementById('modalFeedback'));
 
 // ==========================================
 // 1. CARREGAR A VITRINE DE CURSOS
@@ -145,9 +145,8 @@ async function carregarMeusAgendamentos(){
             const cursoNome = ag.disponibilidades.cursos.nome;
             const dataHora = new Date(ag.disponibilidades.data_hora).toLocaleString('pt-BR');
             let badge = '';
-            let btnCancelar = '';
+            let acoesHTML = '';
 
-           
             if (ag.status === 'agendado') {
                 badge = '<span class="badge bg-primary">Confirmado</span>';
                 acoesHTML = `<button class="btn btn-sm btn-outline-danger mt-2 w-100" onclick="cancelarAgendamento('${ag.id}')">Cancelar Inscrição</button>`;
@@ -174,6 +173,7 @@ async function carregarMeusAgendamentos(){
                     </div>
                 </div>
             `;
+            divAgendamentos.innerHTML += card;
         });
     } catch (error) {
         divAgendamentos.innerHTML = '<p class="text-danger">Erro ao carregar histórico.</p>';
@@ -201,6 +201,7 @@ async function cancelarAgendamento(agendamentoId){
         msgDiv.innerHTML = '<span class="text-danger">Erro ao processar pedido.</span>';
     }
 }
+
 // ==========================================
 // MÓDULO DE FEEDBACK
 // ==========================================

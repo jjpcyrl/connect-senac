@@ -59,55 +59,55 @@ async function carregarUtilizadores(){
             return;
         }
 
-       // Substitua o loop 'users.forEach' na função carregarUtilizadores por esta versão:
-users.forEach(user => {
-    const statusBadge = user.is_bloqueado
-        ? '<span class="badge bg-danger">Bloqueado</span>'
-        : '<span class="badge bg-success">Ativo</span>';
-
-    // Controle de Exclusão por RBAC na Interface
-    // Coordenador só vê botão excluir ativo se for candidato. Admin vê ativo para todos.
-    const podeExcluir = payloadToken.perfil === 'admin' || (payloadToken.perfil === 'coordenador' && user.perfil === 'candidato');
-
-    const btnExcluir = podeExcluir
-        ? `<button class="btn btn-sm btn-danger ms-1" onclick="excluirUsuario('${user.id}', '${user.nome}')">Excluir</button>`
-        : '';
-
-    const btnBloqueio = payloadToken.perfil === 'admin'
-        ? `<button class="btn btn-sm ${user.is_bloqueado ? 'btn-outline-success' : 'btn-outline-danger'}"
-            onclick="toggleBloqueio('${user.id}', ${user.is_bloqueado})">
-            ${user.is_bloqueado ? 'Liberar' : 'Bloquear'}
-           </button>`
-        : '';
-
-    const row = `
-        <tr>
-            <td>
-                <div class="fw-bold">${user.nome}</div>
-                <div class="text-muted small">Membro desde: ${new Date(user.created_at).toLocaleDateString('pt-BR')}</div>
-            </td>
-            <td>
-                <div>${user.email}</div>
-                <div class="text-muted small">${user.telefone}</div>
-            </td>
-            <td>
-                <span class="badge bg-secondary">${user.perfil.toUpperCase()}</span>
-                <div class="mt-1">${statusBadge}</div>
-            </td>
-            <td><span class="text-muted small">${user.cursos_ativos}</span></td>
-            <td class="text-center fw-bold text-primary">${user.total_agendados}</td>
-            <td class="text-center fw-bold text-success">${user.total_concluidos}</td>
-            <td class="text-center fw-bold text-danger">${user.total_cancelados}</td>
-            <td class="text-end">
-                <div class="d-flex justify-content-end">
-                    ${btnBloqueio}
-                    ${btnExcluir}
-                </div>
-            </td>
-        </tr>
-    `;
-    tbody.innerHTML += row;
-});
+        // Substitua o loop 'users.forEach' na função carregarUtilizadores por esta versão:
+        users.forEach(user => {
+            const statusBadge = user.is_bloqueado
+                ? '<span class="badge bg-danger">Bloqueado</span>'
+                : '<span class="badge bg-success">Ativo</span>';
+        
+            // Controle de Exclusão por RBAC na Interface
+            // Coordenador só vê botão excluir ativo se for candidato. Admin vê ativo para todos.
+            const podeExcluir = payloadToken.perfil === 'admin' || (payloadToken.perfil === 'coordenador' && user.perfil === 'candidato');
+        
+            const btnExcluir = podeExcluir
+                ? `<button class="btn btn-sm btn-danger ms-1" onclick="excluirUsuario('${user.id}', '${user.nome}')">Excluir</button>`
+                : '';
+        
+            const btnBloqueio = payloadToken.perfil === 'admin'
+                ? `<button class="btn btn-sm ${user.is_bloqueado ? 'btn-outline-success' : 'btn-outline-danger'}"
+                    onclick="toggleBloqueio('${user.id}', ${user.is_bloqueado})">
+                    ${user.is_bloqueado ? 'Liberar' : 'Bloquear'}
+                   </button>`
+                : '';
+        
+            const row = `
+                <tr>
+                    <td>
+                        <div class="fw-bold">${user.nome}</div>
+                        <div class="text-muted small">Membro desde: ${new Date(user.created_at).toLocaleDateString('pt-BR')}</div>
+                    </td>
+                    <td>
+                        <div>${user.email}</div>
+                        <div class="text-muted small">${user.telefone}</div>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">${user.perfil.toUpperCase()}</span>
+                        <div class="mt-1">${statusBadge}</div>
+                    </td>
+                    <td><span class="text-muted small">${user.cursos_ativos}</span></td>
+                    <td class="text-center fw-bold text-primary">${user.total_agendados}</td>
+                    <td class="text-center fw-bold text-success">${user.total_concluidos}</td>
+                    <td class="text-center fw-bold text-danger">${user.total_cancelados}</td>
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end">
+                            ${btnBloqueio}
+                            ${btnExcluir}
+                        </div>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
     } catch (error) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Erro ao ligar ao servidor.</td></tr>';
     }
@@ -192,13 +192,13 @@ formCurso.addEventListener('submit', async (e) => {
     const msgDiv = document.getElementById('msgCurso');
     msgDiv.innerHTML = '<span class="text-primary">A guardar curso...</span>';
 
-   const payload = {
-    nome: document.getElementById('nomeCurso').value,
-    descricao: document.getElementById('descricaoCurso').value,
-    motivo_modelo: document.getElementById('motivoCurso').value,
-    restricoes: document.getElementById('restricoesCurso').value,
-    profissional_id: document.getElementById('selectProfissional').value // VÍNCULO ADICIONADO!
-};
+    const payload = {
+        nome: document.getElementById('nomeCurso').value,
+        descricao: document.getElementById('descricaoCurso').value,
+        motivo_modelo: document.getElementById('motivoCurso').value,
+        restricoes: document.getElementById('restricoesCurso').value,
+        profissional_id: document.getElementById('selectProfissional').value // VÍNCULO ADICIONADO!
+    };
 
     try {
         const response = await fetch(`${API_URL}/cursos`, {
@@ -279,6 +279,7 @@ formVagas.addEventListener('submit', async (e) => {
         msgDiv.innerHTML = '<span class="text-danger">Erro de ligação.</span>';
     }
 });
+
 async function carregarProfissionaisNoSelect(){
     const select = document.getElementById('selectProfissional');
     try {
@@ -297,6 +298,7 @@ async function carregarProfissionaisNoSelect(){
         select.innerHTML = '<option value="" disabled>Erro ao carregar professores</option>';
     }
 }
+
 async function excluirUsuario(id, nome){
     if (!confirm(`ATENÇÃO: Tem certeza absoluta que deseja remover a conta de ${nome}? Todos os seus agendamentos serão excluídos.`)) return;
 
@@ -319,8 +321,10 @@ async function excluirUsuario(id, nome){
 }
 
 
-// Inicialização de ecrã
+
+// Chame essa função na inicialização do arquivo (no final do admin.js)
 carregarProfissionaisNoSelect();
+// Inicialização de ecrã
 carregarMetricas();
 carregarCursosNoSelect();
 carregarUtilizadores();
