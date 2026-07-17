@@ -54,3 +54,36 @@ exports.criar = async (req, res) => {
         res.status(500).json({ erro: 'Erro interno ao processar a avaliação.' });
     }
 };
+// 2. [VITRINE] Listar avaliações de um curso específico (Público)
+exports.listarPorCurso = async (req, res) => {
+    const { cursoId } = req.params;
+    try {
+        const { data, error } = await supabase
+            .from('view_feedbacks_completos')
+            .select('*')
+            .eq('curso_id', cursoId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ erro: 'Erro ao carregar avaliações do curso.' });
+    }
+};
+
+// 3. [PAINEL DO MODELO] Listar apenas as avaliações que EU fiz
+exports.meusFeedbacks = async (req, res) => {
+    const usuario_id = req.usuario.id;
+    try {
+        const { data, error } = await supabase
+            .from('view_feedbacks_completos')
+            .select('*')
+            .eq('avaliador_id', usuario_id)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ erro: 'Erro ao carregar o seu histórico de avaliações.' });
+    }
+};

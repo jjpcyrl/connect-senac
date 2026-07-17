@@ -14,6 +14,7 @@ document.getElementById('btnSair').addEventListener('click', () => {
 // Instância do Modal do Bootstrap para controlo via JS
 const modalAgendamento = new bootstrap.Modal(document.getElementById('modalAgendamento'));
 const modalFeedback = new bootstrap.Modal(document.getElementById('modalFeedback'));
+const modalDetalhesCurso = new bootstrap.Modal(document.getElementById('modalDetalhesCurso'));
 
 // ==========================================
 // 1. CARREGAR A VITRINE DE CURSOS
@@ -32,16 +33,21 @@ async function carregarCursos(){
             return;
         }
 
-        cursos.forEach(curso => {
+          cursos.forEach(curso => {
             const profNome = curso.usuarios ? curso.usuarios.nome : 'A definir';
+            const local = curso.localizacao || 'SENAC';
+            const imagem = curso.foto_url || 'https://via.placeholder.com/600x400/004a8d/ffffff?text=Connect+Senac';
+
+            // O Card agora é clicável por inteiro e tem a imagem no topo
             const card = `
                 <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm h-100 card-curso">
-                        <div class="card-body">
-                            <h5 class="card-title fw-bold text-dark">${curso.nome}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted small">Prof. ${profNome}</h6>
-                            <p class="card-text small text-secondary mt-3">${curso.descricao.substring(0, 80)}...</p>
-                            <button class="btn btn-outline-primary btn-sm w-100 fw-bold" onclick="abrirModalAgendamento('${curso.id}', '${curso.nome}', '${curso.descricao}')">Ver Horários</button>
+                    <div class="card shadow-sm h-100 card-curso overflow-hidden" style="cursor: pointer;" onclick='abrirModalDetalhesCurso(${JSON.stringify(curso).replace(/'/g, "&#39;")})'>
+                        <img src="${imagem}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="${curso.nome}">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold text-dark mb-1">${curso.nome}</h5>
+                            <div class="text-muted small mb-2">📍 ${local}</div>
+                            <p class="card-text small text-secondary flex-grow-1">${curso.descricao.substring(0, 80)}...</p>
+                            <button class="btn btn-outline-primary btn-sm w-100 fw-bold mt-auto">Saber mais</button>
                         </div>
                     </div>
                 </div>
@@ -51,6 +57,76 @@ async function carregarCursos(){
     } catch (error) {
         divCursos.innerHTML = '<p class="text-danger">Erro ao carregar os cursos.</p>';
     }
+}
+// ==========================================
+// 1.5 MODAL DE DETALHES DO CURSO
+// ==========================================
+function abrirModalDetalhesCurso(curso){
+    // 1. Preencher os dados visuais
+    document.getElementById('detalheCursoNome').textContent = curso.nome;
+    document.getElementById('detalheCursoProf').textContent = curso.usuarios ? curso.usuarios.nome : 'A definir';
+    document.getElementById('detalheCursoLocal').textContent = curso.localizacao || 'SENAC';
+    document.getElementById('detalheCursoDescricao').textContent = curso.descricao;
+
+    // Configurar a Imagem
+    document.getElementById('detalheCursoImagem').src = curso.foto_url || 'https://via.placeholder.com/800x400/004a8d/ffffff?text=Connect+Senac';
+
+    // Configurar o bloco de Restrições (Esconde se não houver)
+    const blocoRestricoes = document.getElementById('blocoRestricoes');
+    if (curso.restricoes && curso.restricoes.trim() !== '') {
+        blocoRestricoes.style.display = 'block';
+        document.getElementById('detalheCursoRestricoes').textContent = curso.restricoes;
+    } else {
+        blocoRestricoes.style.display = 'none';
+    }
+
+    // 2. Programar o botão para abrir o Agendamento
+    const btnHorarios = document.getElementById('btnIrParaHorarios');
+    btnHorarios.onclick = () => {
+        modalDetalhesCurso.hide();
+        // Atraso de 400ms para a animação do Bootstrap não "encavalar" os dois modais
+        setTimeout(() => {
+            abrirModalAgendamento(curso.id, curso.nome, curso.descricao);
+        }, 400);
+    };
+        // [NOVO] Buscar as avaliações deste curso
+    const divAvaliacoes = document.getElementById('detalheCursoAvaliacoes');
+    divAvaliacoes.innerHTML = '<div class="text-center text-muted small">A carregar...</div>';
+
+    fetch(`${API_URL}/feedbacks/curso/${curso.id}`, { headers: { 'Authorization': `Bearer ${token}` } })
+        .then(res => res.json())
+        .then(feedbacks => {
+            if (feedbacks.length === 0) {
+                divAvaliacoes.innerHTML = '<div class="text-muted small text-center py-3">Este curso ainda não tem avaliações. Seja o primeiro a avaliar!</div>';
+                return;
+            }
+
+            // Calcula a Média
+            const media = (feedbacks.reduce((acc, curr) => acc + curr.nota, 0) / feedbacks.length).toFixed(1);
+
+            let html = `<div class="mb-3"><span class="badge bg-warning text-dark fs-6">Nota Média: ${media} / 5.0</span> <span class="small text-muted ms-2">(${feedbacks.length} avaliações)</span></div>`;
+
+            feedbacks.forEach(f => {
+                const estrelas = '⭐'.repeat(f.nota);
+                const dataFormatada = new Date(f.created_at).toLocaleDateString('pt-BR');
+                const comentarioTexto = f.comentario ? `"${f.comentario}"` : '<span class="text-muted fst-italic">Sem comentário escrito.</span>';
+
+                html += `
+                    <div class="bg-light p-3 rounded mb-2 border-start border-warning border-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <strong class="small text-dark">${f.avaliador_nome}</strong>
+                            <span class="small text-muted">${dataFormatada}</span>
+                        </div>
+                        <div class="mb-1">${estrelas}</div>
+                        <div class="small text-secondary">${comentarioTexto}</div>
+                    </div>
+                `;
+            });
+            divAvaliacoes.innerHTML = html;
+        });
+
+    // 3. Mostrar o modal
+    modalDetalhesCurso.show();
 }
 
 // ==========================================
@@ -253,6 +329,51 @@ if (formFeedback) {
         }
     });
 }
+// ==========================================
+// HISTÓRICO PESSOAL DE AVALIAÇÕES
+// ==========================================
+async function carregarMeusFeedbacks(){
+    const divFeedbacks = document.getElementById('listaMeusFeedbacks');
+    try {
+        const response = await fetch(`${API_URL}/feedbacks/meus`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const feedbacks = await response.json();
+
+        divFeedbacks.innerHTML = '';
+        if (feedbacks.length === 0) {
+            divFeedbacks.innerHTML = '<p class="text-muted small">Ainda não realizou nenhuma avaliação.</p>';
+            return;
+        }
+
+        feedbacks.forEach(f => {
+            const estrelas = '⭐'.repeat(f.nota);
+            const dataFormatada = new Date(f.created_at).toLocaleDateString('pt-BR');
+            const comentarioTexto = f.comentario ? `"${f.comentario}"` : 'Apenas nota, sem texto.';
+
+            const card = `
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0 bg-white h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold text-dark text-truncate">${f.curso_nome}</span>
+                                <span class="badge bg-light text-dark">${dataFormatada}</span>
+                            </div>
+                            <div class="mb-3 fs-5">${estrelas}</div>
+                            <p class="text-secondary small mb-0 fst-italic">${comentarioTexto}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            divFeedbacks.innerHTML += card;
+        });
+    } catch (error) {
+        divFeedbacks.innerHTML = '<p class="text-danger">Erro ao carregar o histórico de avaliações.</p>';
+    }
+}
+
+// Não se esqueça de chamar a função aqui no final do ficheiro!
+ carregarMeusFeedbacks();
 
 // Inicializa a página carregando tudo
 carregarCursos();

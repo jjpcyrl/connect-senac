@@ -12,6 +12,8 @@ const autorizarPerfis = require('../middlewares/rbacMiddleware');
 // ----------------------------------------------------------------------
 router.get('/ativos', authMiddleware, cursoController.listarAtivos);
 // Apenas Admin e Coordenador podem alterar ou arquivar os cursos
+router.get('/admin', authMiddleware, autorizarPerfis('admin', 'coordenador'), cursoController.listarTodosAdmin);
+
 router.put('/:id', authMiddleware, autorizarPerfis('admin', 'coordenador'), cursoController.atualizar);
 router.delete('/:id', authMiddleware, autorizarPerfis('admin', 'coordenador'), cursoController.arquivar);
 
