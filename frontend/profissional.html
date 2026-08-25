@@ -63,14 +63,25 @@
       const API_URL =
         window.location.protocol === "file:"
           ? "http://localhost:3000/api"
-          : `${window.location.origin}/api`;
-      const token = localStorage.getItem("token");
+          : `${window.location.origi      const token = localStorage.getItem("token");
 
       if (!token) window.location.href = "index.html";
 
-      const payloadToken = JSON.parse(atob(token.split(".")[1]));
+      let payloadToken = {};
+      try {
+        payloadToken = JSON.parse(atob(token.split(".")[1]));
+      } catch (e) {
+        localStorage.removeItem("token");
+        window.location.href = "index.html";
+      }
+
+      if (payloadToken.perfil !== "profissional" && payloadToken.perfil !== "admin") {
+        alert("Acesso restrito para docentes e administradores.");
+        window.location.href = payloadToken.perfil === "candidato" ? "painel.html" : "admin.html";
+      }
+
       document.getElementById("nomeProf").textContent =
-        payloadToken.email.split("@")[0];
+        payloadToken.email ? payloadToken.email.split("@")[0] : "Docente";
 
       document.getElementById("btnSair").addEventListener("click", () => {
         localStorage.removeItem("token");
@@ -90,7 +101,7 @@
           const cursos = await response.json();
           accordion.innerHTML = "";
 
-          if (cursos.length === 0) {
+          if (!Array.isArray(cursos) || cursos.length === 0) {
             accordion.innerHTML =
               '<div class="alert alert-info border-0 shadow-sm">Nenhum curso ativo vinculado ao seu perfil de momento.</div>';
             return;
@@ -99,79 +110,97 @@
           cursos.forEach((curso, index) => {
             let horariosHTML = "";
 
-            // Ordenar as disponibilidades por data no Front-end por garantia
-            curso.disponibilidades.sort(
-              (a, b) => new Date(a.data_hora) - new Date(b.data_hora),
-            );
-
-            curso.disponibilidades.forEach((disp) => {
-              const dataFormatada = new Date(disp.data_hora).toLocaleString(
-                "pt-BR",
-                { dateStyle: "short", timeStyle: "short" },
+            if (curso.disponibilidades && Array.isArray(curso.disponibilidades)) {
+              // Ordenar as disponibilidades por data no Front-end por garantia
+              curso.disponibilidades.sort(
+                (a, b) => new Date(a.data_hora) - new Date(b.data_hora),
               );
 
-              // Filtrar agendamentos que não foram cancelados
-              const agendamentosAtivos = disp.agendamentos.filter(
-                (a) => a.status !== "cancelado",
-              );
+              curso.disponibilidades.forEach((disp) => {
+                const dataFormatada = new Date(disp.data_hora).toLocaleString(
+                  "pt-BR",
+                  { dateStyle: "short", timeStyle: "short" },
+                );
 
-              let tabelaModelos = "";
-              if (agendamentosAtivos.length === 0) {
-                tabelaModelos = `<p class="text-muted small mb-0 mt-2">Nenhum modelo agendado para este horário ainda.</p>`;
-              } else {
-                // Lógica para mostrar o botão ou apenas o selo
-                let linhas = agendamentosAtivos
-                  .map((ag) => {
-                    let acoesHTML = "";
-                    if (ag.status === "agendado") {
-                      acoesHTML = `<button class="btn btn-sm btn-outline-success fw-bold w-100" onclick="concluirServico('${ag.id}')">✅ Confirmar Presença</button>`;
-                    } else {
-                      acoesHTML = `<span class="badge w-100 py-2 ${ag.status === "concluido" ? "bg-success" : "bg-secondary"}">${ag.status.toUpperCase()}</span>`;
-                    }
+                // Filtrar agendamentos que não foram cancelados
+                const agendamentosAtivos = (disp.agendamentos || []).filter(
+                  (a) => a.status !== "cancelado",
+                );
 
-                    return `
-                                <tr>
-                                    <td class="align-middle">${ag.usuarios.nome}</td>
-                                    <td class="align-middle">${ag.usuarios.email}</td>
-                                    <td class="align-middle"><a href="https://wa.me/55${ag.usuarios.telefone.replace(/\D/g, "")}" target="_blank" class="text-decoration-none text-success">📱 ${ag.usuarios.telefone}</a></td>
-                                    <td class="align-middle" style="width: 150px;">${acoesHTML}</td>
-                                </tr>
-                                `;
-                  })
-                  .join("");
+                let tabelaModelos = "";
+                if (agendamentosAtivos.length === 0) {
+                  tabelaModelos = `<p class="text-muted small mb-0 mt-2">Nenhum modelo agendado para este horário ainda.</p>`;
+                } else {
+                  let linhas = agendamentosAtivos
+                    .map((ag) => {
+                      let acoesHTML = '';
+                      const usuarioNome = ag.usuarios?.nome || 'Modelo';
+                      const usuarioEmail = ag.usuarios?.email || '-';
+                      const usuarioTel = ag.usuarios?.telefone || '';
+                      const telLimpo = usuarioTel.replace(/\D/g, '');
+                      const msgProf = encodeURIComponent(`Olá, ${usuarioNome}! Sou o professor responsável pela aula de ${curso.nome} no Senac.`);
 
-                tabelaModelos = `
-                                <table class="table table-sm mt-3 border">
-                                    <thead class="table-light"><tr><th>Modelo</th><th>Email</th><th>Contacto</th><th>Status</th></tr></thead>
-                                    <tbody>${linhas}</tbody>
-                                </table>`;
-              }
-
-              horariosHTML += `
-                            <div class="mb-4 p-3 bg-white border rounded">
-                                <div class="fw-bold text-dark border-bottom pb-2">📅 Aula: ${dataFormatada} <span class="badge bg-secondary float-end">Ocupação: ${disp.vagas_ocupadas} / ${disp.vagas_totais}</span></div>
-                                ${tabelaModelos}
-                            </div>
+                      if (ag.status === 'agendado') {
+                        acoesHTML = `
+                          <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-outline-success fw-bold w-100" onclick="concluirServico('${ag.id}')" title="Confirmar Presença">✅</button>
+                            <button class="btn btn-sm btn-outline-danger fw-bold w-100" onclick="cancelarAluno('${ag.id}', '${usuarioNome.replace(/'/g, "\\'")}')" title="Cancelar / Falta">❌</button>
+                          </div>
                         `;
-            });
+                      } else {
+                        acoesHTML = `<span class="badge w-100 py-2 ${ag.status === 'concluido' ? 'bg-success' : 'bg-secondary'}">${ag.status.toUpperCase()}</span>`;
+                      }
+
+                      const btnWhats = telLimpo ? `
+                        <a href="https://wa.me/55${telLimpo}?text=${msgProf}" target="_blank" class="btn btn-sm btn-outline-success border-0">
+                          📱 WhatsApp
+                        </a>
+                      ` : '<span class="text-muted small">-</span>';
+
+                      return `
+                        <tr>
+                          <td class="align-middle fw-bold">${usuarioNome}</td>
+                          <td class="align-middle">${usuarioEmail}</td>
+                          <td class="align-middle">${btnWhats}</td>
+                          <td class="align-middle" style="width: 150px;">${acoesHTML}</td>
+                        </tr>
+                      `;
+                    })
+                    .join("");
+
+                  tabelaModelos = `
+                    <table class="table table-sm mt-3 border">
+                      <thead class="table-light"><tr><th>Modelo</th><th>Email</th><th>Contato</th><th>Status</th></tr></thead>
+                      <tbody>${linhas}</tbody>
+                    </table>`;
+                }
+
+                horariosHTML += `
+                  <div class="mb-4 p-3 bg-white border rounded">
+                    <div class="fw-bold text-dark border-bottom pb-2">📅 Aula: ${dataFormatada} <span class="badge bg-secondary float-end">Ocupação: ${disp.vagas_ocupadas} / ${disp.vagas_totais}</span></div>
+                    ${tabelaModelos}
+                  </div>
+                `;
+              });
+            }
 
             const itemOpen = index === 0 ? "show" : "";
             const btnCollapsed = index === 0 ? "" : "collapsed";
 
             accordion.innerHTML += `
-                        <div class="accordion-item border-0 border-bottom">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button ${btnCollapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${curso.id}">
-                                    📘 ${curso.nome}
-                                </button>
-                            </h2>
-                            <div id="collapse${curso.id}" class="accordion-collapse collapse ${itemOpen}" data-bs-parent="#accordionTurmas">
-                                <div class="accordion-body bg-light">
-                                    ${horariosHTML || '<p class="text-muted">Sem horários abertos para este curso.</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    `;
+              <div class="accordion-item border-0 border-bottom">
+                <h2 class="accordion-header">
+                  <button class="accordion-button ${btnCollapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${curso.id}">
+                    📘 ${curso.nome}
+                  </button>
+                </h2>
+                <div id="collapse${curso.id}" class="accordion-collapse collapse ${itemOpen}" data-bs-parent="#accordionTurmas">
+                  <div class="accordion-body bg-light">
+                    ${horariosHTML || '<p class="text-muted">Sem horários abertos para este curso.</p>'}
+                  </div>
+                </div>
+              </div>
+            `;
           });
         } catch (error) {
           accordion.innerHTML =
@@ -181,7 +210,7 @@
 
       carregarMinhasTurmas();
 
-      // Função ativada pelo clique do professor
+      // Função para concluir serviço / dar presença
       async function concluirServico(agendamentoId) {
         if (
           !confirm("O modelo compareceu e o serviço foi realizado com sucesso?")
@@ -201,10 +230,39 @@
             carregarMinhasTurmas(); // Recarrega a tabela instantaneamente
           } else {
             const data = await response.json();
-            alert(data.erro);
+            alert(data.erro || "Erro ao concluir serviço.");
           }
         } catch (error) {
           alert("Erro ao ligar ao servidor.");
+        }
+      }
+
+      // Função para cancelar agendamento / falta
+      async function cancelarAluno(agendamentoId, nomeAluno) {
+        if (
+          !confirm(`Tem a certeza que deseja cancelar o agendamento de "${nomeAluno}"? A vaga será libertada no sistema.`)
+        )
+          return;
+
+        try {
+          const response = await fetch(
+            `${API_URL}/profissional/agendamentos/${agendamentoId}/cancelar`,
+            {
+              method: "PUT",
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+
+          if (response.ok) {
+            carregarMinhasTurmas();
+          } else {
+            const data = await response.json();
+            alert(data.erro || "Erro ao cancelar inscrição.");
+          }
+        } catch (error) {
+          alert("Erro ao ligar ao servidor.");
+        }
+      }o servidor.");
         }
       }
     </script>

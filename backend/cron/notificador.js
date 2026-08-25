@@ -48,15 +48,19 @@ cron.schedule('* * * * *', async () => {
             const dataCurso = new Date(ag.disponibilidades.data_hora);
             const diferencaEmMinutos = Math.floor((dataCurso - agora) / (1000 * 60));
 
-            // Só envia se faltarem exatas 24h (1440 min) ou 3h (180 min)
-            if (diferencaEmMinutos === 1440 || diferencaEmMinutos === 180) {
+            // Envia lembrete para 24h (1439-1440 min) ou 3h (179-180 min)
+            const ehLembrete24h = diferencaEmMinutos >= 1439 && diferencaEmMinutos <= 1440;
+            const ehLembrete3h = diferencaEmMinutos >= 179 && diferencaEmMinutos <= 180;
+
+            if (ehLembrete24h || ehLembrete3h) {
                 // Outra trava de segurança para garantir que o curso e o usuário existem
                 const curso = ag.disponibilidades.cursos?.nome || 'Curso não identificado';
                 const cliente = ag.usuarios?.nome || 'Aluno';
                 const horaFormatada = dataCurso.toLocaleString('pt-BR', { timeStyle: 'short' });
+                const tipoAviso = ehLembrete24h ? 'amanhã' : 'hoje';
 
-                console.log(`\n📧 [EMAIL ENVIADO] Para: ${ag.usuarios?.email || 'Sem e-mail'}`);
-                console.log(`Olá, ${cliente}! Lembramos que o seu agendamento para ${curso} é amanhã/hoje às ${horaFormatada}.`);
+                console.log(`\n📧 [EMAIL/AVISO ENVIADO] Para: ${ag.usuarios?.email || 'Sem e-mail'}`);
+                console.log(`Olá, ${cliente}! Lembramos que o seu agendamento para ${curso} é ${tipoAviso} às ${horaFormatada}.`);
                 console.log(`Em caso de imprevistos, cancele na plataforma com 2 horas de antecedência.\n`);
             }
         });

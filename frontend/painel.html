@@ -4,161 +4,537 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connect Senac - Painel do Modelo</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3 & Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar-brand { font-weight: 700; letter-spacing: 0.5px; }
-        .card-curso { border: none; border-radius: 12px; transition: transform 0.2s; }
-        .card-curso:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
-        .btn-brand { background-color: #004a8d; color: white; border-radius: 8px; font-weight: 600; }
-        .btn-brand:hover { background-color: #003366; color: white; }
-        .section-title { color: #004a8d; font-weight: 700; border-bottom: 2px solid #004a8d; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }</style>
+        :root {
+            --senac-blue: #004a8d;
+            --senac-blue-hover: #003666;
+            --senac-blue-light: #e8f2fa;
+            --senac-orange: #f29100;
+            --senac-orange-hover: #d98200;
+            --surface-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-subtle: #e2e8f0;
+            --shadow-subtle: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+            --shadow-hover: 0 20px 30px -4px rgba(0, 74, 141, 0.12), 0 8px 12px -2px rgba(0, 74, 141, 0.06);
+            --radius-md: 16px;
+            --radius-sm: 10px;
+            --transition-smooth: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background-color: var(--surface-bg);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navbar & Header */
+        .navbar-custom {
+            background: rgba(0, 74, 141, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+        }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff !important;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, #004a8d 0%, #002c54 100%);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px -5px rgba(0, 74, 141, 0.3);
+            margin-bottom: 3rem;
+        }
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(242, 145, 0, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Section Headings */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+            position: relative;
+        }
+        .section-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin-bottom: 0;
+            letter-spacing: -0.3px;
+        }
+        .section-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background-color: var(--senac-blue-light);
+            color: var(--senac-blue);
+            border-radius: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* Cards & Interações */
+        .card-custom {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-subtle);
+            transition: var(--transition-smooth);
+            overflow: hidden;
+        }
+        .card-curso {
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            background: #ffffff;
+            transition: var(--transition-smooth);
+        }
+        .card-curso:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(0, 74, 141, 0.2);
+        }
+        .card-curso .img-wrapper {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 16 / 10;
+            background-color: #e2e8f0;
+            border-top-left-radius: calc(var(--radius-md) - 1px);
+            border-top-right-radius: calc(var(--radius-md) - 1px);
+        }
+        .card-curso .img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.45s ease-out;
+        }
+        .card-curso:hover .img-wrapper img {
+            transform: scale(1.06);
+        }
+
+        /* Buttons & Actions */
+        .btn-brand {
+            background-color: var(--senac-blue);
+            color: #ffffff;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            padding: 0.6rem 1.25rem;
+            border: none;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-brand:hover, .btn-brand:focus-visible {
+            background-color: var(--senac-blue-hover);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 74, 141, 0.25);
+            outline: none;
+        }
+        .btn-action-more {
+            background-color: var(--senac-blue-light);
+            color: var(--senac-blue);
+            font-weight: 700;
+            font-size: 0.875rem;
+            border-radius: var(--radius-sm);
+            padding: 0.65rem 1rem;
+            border: 1px solid transparent;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+        .btn-action-more:hover {
+            background-color: var(--senac-blue);
+            color: #ffffff;
+            border-color: var(--senac-blue);
+        }
+        .btn-action-more i {
+            transition: transform 0.2s ease;
+        }
+        .card-curso:hover .btn-action-more i {
+            transform: translateX(4px);
+        }
+
+        /* Empty State */
+        .empty-state-card {
+            background: #ffffff;
+            border: 1px dashed var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 3.5rem 1.5rem;
+            text-align: center;
+            width: 100%;
+        }
+        .empty-icon-wrapper {
+            width: 72px;
+            height: 72px;
+            background: var(--senac-blue-light);
+            color: var(--senac-blue);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            letter-spacing: 0.2px;
+        }
+        .badge-confirmed {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+        .badge-completed {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+        .badge-cancelled {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .modal-header-image {
+            height: 240px;
+            width: 100%;
+            object-fit: cover;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        .btn-close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            padding: 0.5rem;
+            z-index: 10;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
-          
-    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: #004a8d;">
-        
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top py-3">
         <div class="container">
-            <a class="navbar-brand" href="#">Connect Senac</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand" href="#">
+                <span class="bg-white text-primary rounded-3 px-2 py-1 me-1 fs-6 fw-bold" style="color: #004a8d !important;">S</span>
+                <span>Connect Senac</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link active" href="#vitrine">Agendar Serviço</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#meus-agendamentos">Meus Agendamentos</a></li>
+                <ul class="navbar-nav ms-lg-4 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#vitrine"><i class="bi bi-grid-fill me-1"></i> Agendar Serviço</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#meus-agendamentos"><i class="bi bi-calendar2-check-fill me-1"></i> Meus Agendamentos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#minhas-avaliacoes"><i class="bi bi-star-fill me-1"></i> Minhas Avaliações</a>
+                    </li>
                 </ul>
-                <button class="btn btn-outline-light btn-sm mt-2 mt-lg-0" id="btnSair">Sair</button>
+                
+                <div class="d-flex align-items-center mt-3 mt-lg-0">
+                    <button class="btn btn-outline-light btn-sm px-3 rounded-pill d-flex align-items-center gap-2" id="btnSair">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Sair</span>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container py-5">
+    <!-- Conteúdo Principal -->
+    <main class="container py-4 py-lg-5">
 
-        <h4 class="section-title" id="meus-agendamentos">📅 Os Meus Agendamentos</h4>
-        <div id="listaMeusAgendamentos" class="row g-3 mb-5">
-            <div class="text-center text-muted">A carregar os seus agendamentos...</div>
-        </div>
+        <!-- Banner de Boas-Vindas -->
+        <section class="hero-banner">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill mb-3" style="background-color: var(--senac-orange) !important; color: white !important;">
+                        <i class="bi bi-stars me-1"></i> Área do Modelo
+                    </span>
+                    <h1 class="h2 fw-bold mb-2">Bem-vindo(a) ao Connect Senac</h1>
+                    <p class="text-white-50 mb-0 fs-6">Agende serviços gratuitos como modelo prático dos cursos Senac e colabore diretamente com o desenvolvimento dos alunos.</p>
+                </div>
+            </div>
+        </section>
 
-        <h4 class="section-title" id="vitrine">✨ Cursos Disponíveis para Modelos</h4>
-        <div id="listaCursos" class="row g-4">
-            <div class="text-center text-muted">A carregar o catálogo de serviços...</div>
-        </div>
-                <!-- SECÇÃO 3: As Minhas Avaliações (NOVA) -->
-        <h4 class="section-title mt-5" id="minhas-avaliacoes">💬 As Minhas Avaliações</h4>
-        <div class="row g-3 mb-5" id="listaMeusFeedbacks">
-            <!-- Renderizado via JS -->
-            <div class="text-center text-muted">A carregar o seu histórico...</div>
-        </div>
+        <!-- SEÇÃO 1: Meus Agendamentos -->
+        <section class="mb-5" id="meus-agendamentos">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="section-icon"><i class="bi bi-calendar2-event"></i></span>
+                    Os Meus Agendamentos
+                </h2>
+            </div>
+            
+            <div id="listaMeusAgendamentos" class="row g-4">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="text-muted mt-2 small">Carregando seus agendamentos...</p>
+                </div>
+            </div>
+        </section>
 
-    </div>
-        <!-- Modal Detalhes do Curso -->
-    <div class="modal fade" id="modalDetalhesCurso" tabindex="-1">
+        <!-- SEÇÃO 2: Vitrine de Cursos -->
+        <section class="mb-5" id="vitrine">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">
+                        <span class="section-icon"><i class="bi bi-stars"></i></span>
+                        Cursos Disponíveis para Modelos
+                    </h2>
+                    <p class="text-muted small mt-1 mb-0">Escolha uma especialidade, veja os detalhes e garanta seu horário.</p>
+                </div>
+            </div>
+
+            <div id="listaCursos" class="row g-4">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="text-muted mt-2 small">Carregando catálogo de serviços...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 3: As Minhas Avaliações -->
+        <section class="mb-5" id="minhas-avaliacoes">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">
+                        <span class="section-icon"><i class="bi bi-chat-heart"></i></span>
+                        As Minhas Avaliações
+                    </h2>
+                    <p class="text-muted small mt-1 mb-0">Histórico de feedbacks deixados para os alunos e professores.</p>
+                </div>
+            </div>
+
+            <div class="row g-4" id="listaMeusFeedbacks">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="text-muted mt-2 small">Carregando seu histórico de avaliações...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Detalhes do Curso -->
+    <div class="modal fade" id="modalDetalhesCurso" tabindex="-1" aria-labelledby="detalheCursoNome" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content rounded-4 border-0 shadow overflow-hidden">
+            <div class="modal-content overflow-hidden">
+                <button type="button" class="btn-close btn-close-modal" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                
                 <!-- Imagem de Capa do Modal -->
-                <img id="detalheCursoImagem" src="" class="w-100" style="height: 250px; object-fit: cover;" alt="Capa do Curso">
+                <img id="detalheCursoImagem" src="" class="modal-header-image" alt="Capa do Curso">
 
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h4 class="modal-title fw-bold" id="detalheCursoNome" style="color: #004a8d;">Nome do Curso</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body p-4 pt-2">
-                    <div class="mb-4 text-muted small fw-bold">
-                        <div>📍 <span id="detalheCursoLocal">Localização</span></div>
-                        <div class="mt-1">👨‍🏫 Prof. <span id="detalheCursoProf">Nome</span></div>
+                <div class="p-4 pt-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                        <h3 class="modal-title fw-bold h4 mb-0" id="detalheCursoNome" style="color: var(--senac-blue);">Nome do Curso</h3>
                     </div>
 
-                    <h6 class="fw-bold">Sobre o serviço</h6>
-                    <p id="detalheCursoDescricao" class="text-secondary mb-4"></p>
+                    <div class="d-flex flex-wrap gap-3 p-3 rounded-3 bg-light text-muted small mb-4">
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="bi bi-geo-alt-fill text-danger"></i>
+                            <span id="detalheCursoLocal">Localização</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="bi bi-person-badge-fill text-primary"></i>
+                            <span>Prof. <strong id="detalheCursoProf" class="text-dark">Nome</strong></span>
+                        </div>
+                    </div>
 
+                    <h5 class="fw-bold fs-6 mb-2">Sobre o serviço</h5>
+                    <p id="detalheCursoDescricao" class="text-secondary small leading-relaxed mb-4"></p>
+
+                    <!-- Bloco de Avaliações no Modal -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold fs-6 mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-star-half text-warning"></i>
+                            Avaliações de outros modelos
+                        </h5>
+                        <div id="detalheCursoAvaliacoes" class="p-2 rounded-3 bg-light" style="max-height: 220px; overflow-y: auto;">
+                            <div class="text-muted small text-center py-2">Carregando avaliações...</div>
+                        </div>
+                    </div>
+
+                    <!-- Bloco de Restrições -->
                     <div id="blocoRestricoes" class="mb-4">
-                                            <!-- Bloco de Avaliações no Modal -->
-                    <hr class="text-muted">
-                    <h6 class="fw-bold text-dark mt-3">⭐ Avaliações de outros modelos</h6>
-                    <div id="detalheCursoAvaliacoes" class="mt-3 mb-2" style="max-height: 200px; overflow-y: auto;">
-                        <!-- Comentários renderizados via JS -->
-                        <div class="text-muted small text-center">A carregar avaliações...</div>
+                        <div class="p-3 rounded-3 bg-danger-subtle border border-danger-subtle text-danger-emphasis">
+                            <h6 class="fw-bold small d-flex align-items-center gap-2 mb-1">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                Atenção & Restrições
+                            </h6>
+                            <p id="detalheCursoRestricoes" class="small mb-0"></p>
+                        </div>
                     </div>
-                     
-                        <h6 class="fw-bold text-danger">⚠️ Atenção (Restrições)</h6>
-                        <p id="detalheCursoRestricoes" class="text-secondary small bg-light p-3 rounded border-start border-danger border-4"></p>
-                    </div>
-                </div>
 
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Voltar</button>
-                    <!-- Este botão vai chamar o Modal de Horários a seguir -->
-                    <button type="button" class="btn btn-brand px-4" id="btnIrParaHorarios">Ver Horários Disponíveis</button>
+                    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                        <button type="button" class="btn btn-light px-4 rounded-3 fw-semibold" data-bs-dismiss="modal">Voltar</button>
+                        <button type="button" class="btn btn-brand px-4" id="btnIrParaHorarios">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Ver Horários Disponíveis</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-                      
 
-    <div class="modal fade" id="modalAgendamento" tabindex="-1">
+    <!-- Modal Agendamento -->
+    <div class="modal fade" id="modalAgendamento" tabindex="-1" aria-labelledby="modalCursoNome" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="modalCursoNome">Escolher Horário</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="small text-muted mb-3" id="modalCursoDescricao"></p>
-                    <div class="form-floating mb-3">
-                        <select class="form-select" id="selectHorarios">
-                            <option value="" disabled selected>A procurar horários...</option>
-                        </select>
-                        <label for="selectHorarios">Horários Disponíveis</label>
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary fw-bold mb-1">Passo 2 de 2</span>
+                        <h5 class="modal-title fw-bold" id="modalCursoNome">Escolher Horário</h5>
                     </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <p class="small text-muted mb-3" id="modalCursoDescricao"></p>
+                    
+                    <label for="selectHorarios" class="form-label small fw-bold text-dark mb-1">Selecione uma data e horário</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-light"><i class="bi bi-calendar-event"></i></span>
+                        <select class="form-select" id="selectHorarios">
+                            <option value="" disabled selected>Procurando horários...</option>
+                        </select>
+                    </div>
+
                     <div id="msgAgendamento" class="text-center small fw-bold mb-2"></div>
                 </div>
-                <div class="modal-footer border-top-0 pt-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-brand" id="btnConfirmarAgendamento">Confirmar Presença</button>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-brand" id="btnConfirmarAgendamento">
+                        <i class="bi bi-check2-circle"></i>
+                        <span>Confirmar Presença</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="modal fade" id="modalFeedback" tabindex="-1">
+
+    <!-- Modal Feedback -->
+    <div class="modal fade" id="modalFeedback" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold">Avaliar Serviço</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        Avaliar Serviço
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="small text-muted mb-3">Como foi a sua experiência? A sua opinião ajuda os nossos alunos a evoluírem!</p>
+                <div class="modal-body pt-3">
+                    <p class="small text-muted mb-4">Sua avaliação é essencial para o aprendizado prático dos alunos do Senac!</p>
 
                     <form id="formFeedback">
                         <input type="hidden" id="feedbackAgendamentoId">
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold small">Nota (1 a 5 estrelas)</label>
-                            <select class="form-select" id="feedbackNota" required>
+                            <label class="form-label fw-bold small">Nota da Experiência</label>
+                            <select class="form-select rounded-3" id="feedbackNota" required>
                                 <option value="5">⭐⭐⭐⭐⭐ (5) - Excelente</option>
                                 <option value="4">⭐⭐⭐⭐ (4) - Muito Bom</option>
                                 <option value="3">⭐⭐⭐ (3) - Bom</option>
                                 <option value="2">⭐⭐ (2) - Regular</option>
-                                <option value="1">⭐ (1) - Mau</option>
+                                <option value="1">⭐ (1) - Insatisfatório</option>
                             </select>
                         </div>
 
-                        <div class="form-floating mb-3">
-                            <textarea class="form-control" id="feedbackComentario" style="height: 100px" placeholder="Deixe um comentário"></textarea>
-                            <label for="feedbackComentario">Comentário (Opcional)</label>
+                        <div class="mb-3">
+                            <label for="feedbackComentario" class="form-label fw-bold small">Comentário ou Sugestão (Opcional)</label>
+                            <textarea class="form-control rounded-3" id="feedbackComentario" rows="3" placeholder="Conte como foi o atendimento e o resultado do serviço..."></textarea>
                         </div>
 
-                        <div id="msgFeedback" class="text-center small fw-bold mb-2"></div>
+                        <div id="msgFeedback" class="text-center small fw-bold mb-3"></div>
 
-                        <button type="submit" class="btn btn-success w-100">Enviar Avaliação</button>
+                        <button type="submit" class="btn btn-brand w-100 py-2">
+                            <i class="bi bi-send-fill"></i>
+                            <span>Enviar Avaliação</span>
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/painel.js"></script>
 </body>

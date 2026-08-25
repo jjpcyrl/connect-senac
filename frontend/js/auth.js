@@ -27,6 +27,7 @@ if (formLogin) {
       const data = await response.json();
 
       if (response.ok) {
+        if (msgErro) msgErro.classList.add("d-none");
         localStorage.setItem("token", data.token);
 
         // Redirecionamento Inteligente baseado no Perfil (RBAC)
@@ -39,9 +40,18 @@ if (formLogin) {
         } else {
           window.location.href = "painel.html"; // Candidato/Modelo
         }
+      } else {
+        if (msgErro) {
+          msgErro.textContent = data.erro || "Falha ao autenticar.";
+          msgErro.classList.remove("d-none");
+        }
       }
     } catch (error) {
       console.error("Erro na requisição:", error);
+      if (msgErro) {
+        msgErro.textContent = "Erro de ligação ao servidor.";
+        msgErro.classList.remove("d-none");
+      }
     }
   });
 }

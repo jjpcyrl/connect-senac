@@ -19,4 +19,9 @@ router.get('/profissionais', authMiddleware, autorizarPerfis('admin', 'coordenad
 
 router.delete('/usuarios/:id', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.excluirUsuario);
 
+// Apenas o ADMIN supremo pode promover ou despromover utilizadores
+router.put('/usuarios/:id/perfil', authMiddleware, autorizarPerfis('admin'), adminController.alterarPerfil);
+
+router.get('/pautas', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.listarPautasGlobais);
+
 module.exports = router;
