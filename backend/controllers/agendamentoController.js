@@ -15,15 +15,20 @@ exports.criar = async (req, res) => {
     }
 
     try {
-        // 1. Verificar se a vaga existe e tem espaço (Regra de Overbooking)
+        // 1. Verificar se a vaga existe, se não passou e se tem espaço (Regra de Overbooking)
         const { data: disponibilidade, error: erroDisp } = await supabase
             .from('disponibilidades')
-            .select('vagas_totais, vagas_ocupadas')
+            .select('id, data_hora, vagas_totais, vagas_ocupadas')
             .eq('id', disponibilidade_id)
             .single();
 
         if (erroDisp || !disponibilidade) {
             return res.status(404).json({ erro: 'Horário não encontrado.' });
+        }
+
+        // Validação Temporal: Impedir agendamentos em horários passados
+        if (new Date(disponibilidade.data_hora) <= new Date()) {
+            return res.status(400).json({ erro: 'Não é possível agendar horários que já passaram.' });
         }
 
         if (disponibilidade.vagas_ocupadas >= disponibilidade.vagas_totais) {
@@ -108,11 +113,18 @@ exports.cancelar = async (req, res) => {
             return res.status(400).json({ erro: 'Este agendamento já está cancelado.' });
         }
 
-        // Validação da Regra das 2 Horas
         const dataHoraCurso = new Date(agendamento.disponibilidades.data_hora);
         const agora = new Date();
-        const diferencaEmHoras = (dataHoraCurso - agora) / (1000 * 60 * 60);
 
+        // 1. Trata se o curso já ocorreu
+        if (dataHoraCurso <= agora) {
+            return res.status(400).json({
+                erro: 'Este curso já foi realizado e não pode mais ser cancelado.'
+            });
+        }
+
+        // 2. Validação da Regra das 2 Horas
+        const diferencaEmHoras = (dataHoraCurso - agora) / (1000 * 60 * 60);
         if (diferencaEmHoras < 2) {
             return res.status(403).json({
                 erro: 'Não é possível cancelar com menos de 2 horas de antecedência. Em caso de emergência, contacte a coordenação.'
@@ -123,10 +135,12 @@ exports.cancelar = async (req, res) => {
         await supabase.from('agendamentos').update({ status: 'cancelado' }).eq('id', id);
 
         // Liberta a vaga na tabela de disponibilidades
-        await supabase
-            .from('disponibilidades')
-            .update({ vagas_ocupadas: agendamento.disponibilidades.vagas_ocupadas - 1 })
-            .eq('id', agendamento.disponibilidades.id);
+        if (agendamento.disponibilidades.vagas_ocupadas > 0) {
+            await supabase
+                .from('disponibilidades')
+                .update({ vagas_ocupadas: agendamento.disponibilidades.vagas_ocupadas - 1 })
+                .eq('id', agendamento.disponibilidades.id);
+        }
 
         res.json({ mensagem: 'Agendamento cancelado com sucesso. A sua vaga foi libertada.' });
     } catch (error) {

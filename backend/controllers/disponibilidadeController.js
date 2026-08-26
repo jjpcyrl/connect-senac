@@ -5,8 +5,22 @@ const supabase = require('../config/database');
 exports.criar = async (req, res) => {
     const { curso_id, data_hora, vagas_totais } = req.body;
 
-    if (!curso_id || !data_hora || !vagas_totais) {
+    if (!curso_id || !data_hora || vagas_totais === undefined || vagas_totais === null) {
         return res.status(400).json({ erro: 'Curso, data/hora e número de vagas são obrigatórios.' });
+    }
+
+    const vagasNum = parseInt(vagas_totais, 10);
+    if (isNaN(vagasNum) || vagasNum <= 0) {
+        return res.status(400).json({ erro: 'O número de vagas deve ser um número inteiro positivo.' });
+    }
+
+    const dataParsed = new Date(data_hora);
+    if (isNaN(dataParsed.getTime())) {
+        return res.status(400).json({ erro: 'Data e hora inválidas.' });
+    }
+
+    if (dataParsed <= new Date()) {
+        return res.status(400).json({ erro: 'A data e hora do horário deve ser futura.' });
     }
 
     try {
@@ -14,8 +28,8 @@ exports.criar = async (req, res) => {
             .from('disponibilidades')
             .insert([{
                 curso_id,
-                data_hora,
-                vagas_totais
+                data_hora: dataParsed.toISOString(),
+                vagas_totais: vagasNum
             }])
             .select();
 

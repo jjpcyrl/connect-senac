@@ -22,6 +22,12 @@ exports.listarUtilizadores = async (req, res) => {
 exports.alterarStatusBloqueio = async (req, res) => {
     const { id } = req.params;
     const { is_bloqueado } = req.body;
+    const executorId = req.usuario.id;
+
+    // Trava de segurança: impede que o administrador se autobloqueie
+    if (id === executorId && is_bloqueado) {
+        return res.status(400).json({ erro: 'Você não pode bloquear sua própria conta administrativa.' });
+    }
 
     try {
         const { data, error } = await supabase

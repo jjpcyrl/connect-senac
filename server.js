@@ -4,8 +4,8 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-// O cron só deve rodar em servidor persistente, não em funções serverless da Vercel
-if (!process.env.VERCEL) {
+// O cron só deve rodar em servidor persistente, não em funções serverless da Vercel ou testes
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
     try {
         require('./backend/cron/notificador');
     } catch (e) {
@@ -19,12 +19,34 @@ const agendamentoRoutes = require('./backend/routes/agendamentoRoutes');
 const cursoRoutes = require('./backend/routes/cursoRoutes'); 
 const disponibilidadeRoutes = require('./backend/routes/disponibilidadeRoutes');
 
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Configuração de Segurança HTTP (Helmet)
+app.use(helmet({
+    contentSecurityPolicy: false, // Permite carregar CDNs do Bootstrap e scripts do projeto
+    crossOriginEmbedderPolicy: false
+}));
+
 // Middlewares
 app.use(cors()); // Libera o acesso do Front-end
-app.use(express.json()); // Ensina o Express a entender requisições no formato JSON
+app.use(express.json({ limit: '1mb' })); // Limita tamanho do body JSON contra payloads maliciosos
+
+// Rate Limiting para proteção contra ataques de força bruta e DoS
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // Janela de 15 minutos
+    max: 20, // Limite de 20 tentativas por IP
+    message: { erro: 'Muitas tentativas a partir deste IP. Tente novamente em 15 minutos.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Aplica limitador estrito em rotas de autenticação sensíveis
+app.use('/api/usuarios/login', authLimiter);
+app.use('/api/usuarios/esqueci-senha', authLimiter);
 
 // Entrega arquivos estáticos do frontend
 app.use(express.static(path.join(__dirname, 'frontend')));
@@ -44,8 +66,8 @@ app.use('/api/admin', require('./backend/routes/adminRoutes'));
 app.use('/api/profissional', require('./backend/routes/profissionalRoutes'));
 app.use('/api/feedbacks', require('./backend/routes/feedbackRoutes'));
 
-// Iniciando o servidor (apenas fora do ambiente Serverless da Vercel)
-if (require.main === module || !process.env.VERCEL) {
+// Iniciando o servidor (apenas fora do ambiente Serverless da Vercel e fora de testes automatizados)
+if ((require.main === module || !process.env.VERCEL) && process.env.NODE_ENV !== 'test') {
     app.listen(PORT, () => {
         console.log(`Servidor rodando na porta ${PORT}`);
         console.log(`Acesse: http://localhost:${PORT}/api/status`);
