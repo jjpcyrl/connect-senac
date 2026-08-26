@@ -1,20 +1,24 @@
 // backend/middlewares/authMiddleware.js
-// backend/middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
-const supabase = require('../config/database'); // Importação do banco
+const supabase = require('../config/database');
 
 module.exports = async (req, res, next) => {
-    const token = req.header('Authorization');
+    const authHeader = req.header('Authorization');
 
-    if (!token) {
-        return res.status(401).json({ erro: 'Acesso negado. Faça login para continuar.' });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ erro: 'Acesso negado. Token não fornecido ou mal formatado.' });
+    }
+
+    if (!process.env.JWT_SECRET) {
+        console.error('CRÍTICO: JWT_SECRET não está definido nas variáveis de ambiente!');
+        return res.status(500).json({ erro: 'Erro de configuração de segurança do servidor.' });
     }
 
     try {
-        const tokenLimpo = token.replace('Bearer ', '');
-        const decodificado = jwt.verify(tokenLimpo, process.env.JWT_SECRET || 'chave_super_secreta_senac');
+        const tokenLimpo = authHeader.replace('Bearer ', '').trim();
+        const decodificado = jwt.verify(tokenLimpo, process.env.JWT_SECRET);
 
-        // CONSULTA DE SEGURANÇA EM TEMPO REAL:
+        // Consulta de segurança em tempo real para verificar se o usuário está bloqueado
         const { data: usuario, error } = await supabase
             .from('usuarios')
             .select('is_bloqueado')

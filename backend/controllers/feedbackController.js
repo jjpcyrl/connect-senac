@@ -5,13 +5,19 @@ exports.criar = async (req, res) => {
     const { agendamento_id, nota, comentario } = req.body;
     const usuario_id = req.usuario.id;
 
-    if (!agendamento_id || !nota) {
+    if (!agendamento_id || nota === undefined || nota === null) {
         return res.status(400).json({ erro: 'O ID do agendamento e a nota são obrigatórios.' });
     }
 
-    if (nota < 1 || nota > 5) {
-        return res.status(400).json({ erro: 'A nota deve ser entre 1 e 5.' });
+    const notaNum = parseInt(nota, 10);
+    if (isNaN(notaNum) || notaNum < 1 || notaNum > 5) {
+        return res.status(400).json({ erro: 'A nota deve ser um número inteiro entre 1 e 5.' });
     }
+
+    // Sanitização de comentário (limita a 500 caracteres, remove tags HTML)
+    const comentarioSanitizado = typeof comentario === 'string'
+        ? comentario.replace(/<[^>]*>?/gm, '').trim().substring(0, 500)
+        : null;
 
     try {
         // 1. Validar se o agendamento pertence ao utilizador e se está CONCLUÍDO
@@ -36,7 +42,7 @@ exports.criar = async (req, res) => {
         // 2. Inserir o Feedback
         const { data: novoFeedback, error: erroInsert } = await supabase
             .from('feedbacks')
-            .insert([{ agendamento_id, nota, comentario }])
+            .insert([{ agendamento_id, nota: notaNum, comentario: comentarioSanitizado }])
             .select();
 
         if (erroInsert) {

@@ -63,12 +63,21 @@ exports.registrar = async (req, res) => {
 exports.login = async (req, res) => {
     const { email, senha } = req.body;
 
+    if (!email || !senha || typeof email !== 'string' || typeof senha !== 'string') {
+        return res.status(400).json({ erro: 'E-mail e senha são obrigatórios e devem ser válidos.' });
+    }
+
+    if (!process.env.JWT_SECRET) {
+        console.error('CRÍTICO: JWT_SECRET não está definido nas variáveis de ambiente!');
+        return res.status(500).json({ erro: 'Erro de configuração de segurança do servidor.' });
+    }
+
     try {
         // Procurar o utilizador pelo e-mail no Supabase
         const { data: utilizador, error: erroBusca } = await supabase
             .from('usuarios')
             .select('*')
-            .eq('email', email)
+            .eq('email', email.trim().toLowerCase())
             .maybeSingle();
 
         if (erroBusca) throw erroBusca;
@@ -87,7 +96,7 @@ exports.login = async (req, res) => {
         // Guardamos o 'id' e o 'perfil' (role) dentro do token para o sistema de permissões (RBAC)
         const token = jwt.sign(
             { id: utilizador.id, email: utilizador.email, perfil: utilizador.perfil },
-            process.env.JWT_SECRET || 'chave_super_secreta_senac',
+            process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -101,21 +110,21 @@ exports.login = async (req, res) => {
         res.status(500).json({ erro: 'Erro interno ao realizar o login.' });
     }
 };
-// backend/controllers/usuarioController.js
 
-
-// ... (mantenha as funções registrar e login intactas) ...
-
-// 3. SOLICITAR RECUPERAÇÃO DE PALAVRA-PASSE
+// 3. SOLICITAR RECUPERAÇÃO DE PALAVRA-PASSE (Com Hash SHA-256 - Padrão OWASP)
 exports.solicitarRecuperacao = async (req, res) => {
     const { email } = req.body;
+
+    if (!email || typeof email !== 'string') {
+        return res.status(400).json({ erro: 'E-mail inválido.' });
+    }
 
     try {
         // 1. Verificar se o utilizador existe
         const { data: utilizador, error: erroBusca } = await supabase
             .from('usuarios')
             .select('id, nome')
-            .eq('email', email)
+            .eq('email', email.trim().toLowerCase())
             .maybeSingle();
 
         if (erroBusca) throw erroBusca;
@@ -125,24 +134,25 @@ exports.solicitarRecuperacao = async (req, res) => {
         }
 
         // 2. Gerar Token Aleatório (64 caracteres Hexadecimais)
-        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenRaw = crypto.randomBytes(32).toString('hex');
+        // Armazenamos o hash SHA-256 no banco (OWASP) para que o token puro nunca fique em texto plano
+        const resetTokenHash = crypto.createHash('sha256').update(resetTokenRaw).digest('hex');
 
-        // 3. Definir expiração (ex: 1 hora a partir de agora)
+        // 3. Definir expiração (1 hora a partir de agora)
         const expiraEm = new Date();
         expiraEm.setHours(expiraEm.getHours() + 1);
 
-        // 4. Guardar o token e a expiração no banco
+        // 4. Guardar o token hasheado e a expiração no banco
         await supabase
             .from('usuarios')
             .update({
-                reset_token: resetToken,
+                reset_token: resetTokenHash,
                 reset_token_expires: expiraEm.toISOString()
             })
             .eq('id', utilizador.id);
 
-        // 5. Simular o envio de E-mail (No mundo real, usaríamos o Nodemailer aqui)
-        // Como o Front-end e Back-end dividem a mesma origem, montamos o link dinamicamente
-        const linkRecuperacao = `${req.protocol}://${req.get('host')}/redefinir-senha.html?token=${resetToken}`;
+        // 5. Simular o envio de E-mail enviando o token puro no link
+        const linkRecuperacao = `${req.protocol}://${req.get('host')}/redefinir-senha.html?token=${resetTokenRaw}`;
 
         console.log(`\n📧 [SIMULAÇÃO DE E-MAIL]`);
         console.log(`Para: ${email}`);
@@ -157,21 +167,28 @@ exports.solicitarRecuperacao = async (req, res) => {
     }
 };
 
-// 4. REDEFINIR A PALAVRA-PASSE
+// 4. REDEFINIR A PALAVRA-PASSE (Validando Hash SHA-256)
 exports.redefinirSenha = async (req, res) => {
     const { token, nova_senha, confirmar_senha } = req.body;
+
+    if (!token || typeof token !== 'string' || !nova_senha || !confirmar_senha) {
+        return res.status(400).json({ erro: 'Dados incompletos ou inválidos.' });
+    }
 
     if (nova_senha !== confirmar_senha) {
         return res.status(400).json({ erro: 'As palavras-passe não coincidem.' });
     }
 
     try {
-        // 1. Procurar o utilizador que tem este token e verificar se ainda é válido (data > agora)
+        // Hasheia o token recebido para comparar com o banco
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+        // 1. Procurar o utilizador que tem este hash de token e verificar se ainda é válido
         const agora = new Date().toISOString();
         const { data: utilizador, error: erroBusca } = await supabase
             .from('usuarios')
             .select('id')
-            .eq('reset_token', token)
+            .eq('reset_token', tokenHash)
             .gt('reset_token_expires', agora) // Valida se ainda não expirou
             .maybeSingle();
 

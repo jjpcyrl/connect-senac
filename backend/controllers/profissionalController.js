@@ -81,26 +81,37 @@ exports.cancelarInscricao = async (req, res) => {
     try {
         const { data: agendamento, error: erroBusca } = await supabase
             .from('agendamentos')
-            .select('status, disponibilidades(cursos(profissional_id))')
+            .select('status, disponibilidade_id, disponibilidades(vagas_ocupadas, cursos(profissional_id))')
             .eq('id', id)
             .single();
 
         if (erroBusca || !agendamento) return res.status(404).json({ erro: 'Agendamento não encontrado.' });
-        if (agendamento.disponibilidades.cursos.profissional_id !== profissional_id) {
+        if (!agendamento.disponibilidades?.cursos || agendamento.disponibilidades.cursos.profissional_id !== profissional_id) {
             return res.status(403).json({ erro: 'Não tem permissão para alterar a pauta de outro professor.' });
         }
         if (agendamento.status !== 'agendado') {
             return res.status(400).json({ erro: 'Apenas agendamentos ativos podem ser cancelados.' });
         }
 
+        // 1. Atualiza status do agendamento
         const { error: erroUpdate } = await supabase
             .from('agendamentos')
             .update({ status: 'cancelado' })
             .eq('id', id);
 
         if (erroUpdate) throw erroUpdate;
-        res.json({ mensagem: 'Inscrição cancelada. A vaga foi libertada no sistema.' });
+
+        // 2. Decrementa contador de vagas ocupadas
+        if (agendamento.disponibilidades && agendamento.disponibilidades.vagas_ocupadas > 0) {
+            await supabase
+                .from('disponibilidades')
+                .update({ vagas_ocupadas: agendamento.disponibilidades.vagas_ocupadas - 1 })
+                .eq('id', agendamento.disponibilidade_id);
+        }
+
+        res.json({ mensagem: 'Inscrição cancelada e vaga restaurada com sucesso.' });
     } catch (error) {
-        res.status(500).json({ erro: 'Erro ao cancelar a inscrição.' });
+        console.error('Erro ao cancelar inscrição:', error.message);
+        res.status(500).json({ erro: 'Erro interno ao cancelar a inscrição.' });
     }
 };
