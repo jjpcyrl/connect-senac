@@ -4,79 +4,27 @@ const FALLBACK_BASE_URL = 'http://localhost:3000/api';
 const API_URL = window.location.protocol === 'file:' ? FALLBACK_BASE_URL : `${window.location.origin}/api`;
 
 const token = localStorage.getItem('token');
-const isAutenticado = Boolean(token);
+if (!token) window.location.href = 'index.html';
+
+document.getElementById('btnSair').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    window.location.href = 'index.html';
+});
 
 // Instâncias dos Modais do Bootstrap
 const modalAgendamento = new bootstrap.Modal(document.getElementById('modalAgendamento'));
 const modalFeedback = new bootstrap.Modal(document.getElementById('modalFeedback'));
 const modalDetalhesCurso = new bootstrap.Modal(document.getElementById('modalDetalhesCurso'));
-const modalLoginNecessarioEl = document.getElementById('modalLoginNecessario');
-const modalLoginNecessario = modalLoginNecessarioEl ? new bootstrap.Modal(modalLoginNecessarioEl) : null;
 
 // ==========================================
-// 0. CONFIGURAÇÃO DA NAVBAR E INTERFACE
-// ==========================================
-function configurarInterfaceUsuario() {
-    const navAuthActions = document.getElementById('navAuthActions');
-    const authOnlyElements = document.querySelectorAll('.auth-only');
-
-    if (isAutenticado) {
-        // Usuário Logado: exibe abas privadas
-        authOnlyElements.forEach(el => el.classList.remove('d-none'));
-
-        let nomeUsuario = 'Minha Conta';
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            if (payload.email) nomeUsuario = payload.email.split('@')[0];
-
-            const navLinks = document.getElementById('navLinks');
-            if (payload.perfil === 'admin' || payload.perfil === 'coordenador') {
-                navLinks.innerHTML += `<li class="nav-item"><a class="nav-link text-warning fw-bold" href="admin.html"><i class="bi bi-speedometer2 me-1"></i> Painel Admin</a></li>`;
-            } else if (payload.perfil === 'profissional') {
-                navLinks.innerHTML += `<li class="nav-item"><a class="nav-link text-warning fw-bold" href="profissional.html"><i class="bi bi-journal-text me-1"></i> Pauta do Professor</a></li>`;
-            }
-        } catch (e) {
-            console.error("Erro ao decodificar token:", e);
-        }
-
-        navAuthActions.innerHTML = `
-            <span class="text-white-50 small me-2 d-none d-md-inline">
-                <i class="bi bi-person-circle text-warning me-1"></i> ${nomeUsuario}
-            </span>
-            <button class="btn btn-outline-light btn-sm px-3 rounded-pill d-flex align-items-center gap-2" id="btnSair">
-                <i class="bi bi-box-arrow-right"></i>
-                <span>Sair</span>
-            </button>
-        `;
-
-        document.getElementById('btnSair').addEventListener('click', () => {
-            localStorage.removeItem('token');
-            window.location.href = 'index.html';
-        });
-
-    } else {
-        // Visitante / Não Logado: botões para entrar ou criar conta
-        authOnlyElements.forEach(el => el.classList.add('d-none'));
-
-        navAuthActions.innerHTML = `
-            <a href="index.html" class="btn btn-outline-light btn-sm px-3 rounded-pill d-flex align-items-center gap-1" id="btnNavLogin">
-                <i class="bi bi-box-arrow-in-right"></i> Entrar
-            </a>
-            <a href="cadastro.html" class="btn btn-warning btn-sm px-3 rounded-pill fw-bold text-dark d-flex align-items-center gap-1" id="btnNavCadastro" style="background-color: var(--senac-orange); border-color: var(--senac-orange); color: #fff !important;">
-                <i class="bi bi-person-plus-fill"></i> Cadastre-se
-            </a>
-        `;
-    }
-}
-
-// ==========================================
-// 1. CARREGAR A VITRINE DE CURSOS (PÚBLICO)
+// 1. CARREGAR A VITRINE DE CURSOS
 // ==========================================
 async function carregarCursos(){
     const divCursos = document.getElementById('listaCursos');
     try {
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        const response = await fetch(`${API_URL}/cursos/ativos`, { headers });
+        const response = await fetch(`${API_URL}/cursos/ativos`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
         const cursos = await response.json();
 
         divCursos.innerHTML = '';
@@ -121,7 +69,7 @@ async function carregarCursos(){
                             </p>
                             <div class="pt-2 border-top">
                                 <button class="btn btn-action-more w-100" type="button">
-                                    <span>Saber mais e ver horários</span>
+                                    <span>Saber mais</span>
                                     <i class="bi bi-arrow-right"></i>
                                 </button>
                             </div>
@@ -144,7 +92,7 @@ async function carregarCursos(){
 }
 
 // ==========================================
-// 1.5 MODAL DE DETALHES DO CURSO (PÚBLICO)
+// 1.5 MODAL DE DETALHES DO CURSO
 // ==========================================
 function abrirModalDetalhesCurso(curso){
     document.getElementById('detalheCursoNome').textContent = curso.nome;
@@ -173,8 +121,7 @@ function abrirModalDetalhesCurso(curso){
     const divAvaliacoes = document.getElementById('detalheCursoAvaliacoes');
     divAvaliacoes.innerHTML = '<div class="text-center text-muted small py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Buscando avaliações...</div>';
 
-    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-    fetch(`${API_URL}/feedbacks/curso/${curso.id}`, { headers })
+    fetch(`${API_URL}/feedbacks/curso/${curso.id}`, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.json())
         .then(feedbacks => {
             if (!feedbacks || feedbacks.length === 0) {
@@ -232,25 +179,14 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao){
     select.innerHTML = '<option value="" disabled selected>Procurando horários...</option>';
 
     const btnConfirmar = document.getElementById('btnConfirmarAgendamento');
-    btnConfirmar.onclick = () => {
-        // Se o usuário não estiver logado, exibe o modal convidando para login/cadastro
-        if (!isAutenticado) {
-            modalAgendamento.hide();
-            setTimeout(() => {
-                if (modalLoginNecessario) modalLoginNecessario.show();
-                else window.location.href = 'index.html';
-            }, 350);
-            return;
-        }
-
-        realizarAgendamento(select.value);
-    };
+    btnConfirmar.onclick = () => realizarAgendamento(select.value);
 
     modalAgendamento.show();
 
     try {
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        const response = await fetch(`${API_URL}/disponibilidades/curso/${cursoId}`, { headers });
+        const response = await fetch(`${API_URL}/disponibilidades/curso/${cursoId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
         const horarios = await response.json();
 
         select.innerHTML = '<option value="" disabled selected>Escolha um horário...</option>';
@@ -291,7 +227,7 @@ async function realizarAgendamento(disponibilidadeId){
 
         if (response.ok) {
             msgDiv.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Agendamento concluído com sucesso!</span>`;
-            if (isAutenticado) carregarMeusAgendamentos();
+            carregarMeusAgendamentos();
             setTimeout(() => modalAgendamento.hide(), 1400);
         } else {
             msgDiv.innerHTML = `<span class="text-danger">${data.erro || 'Erro ao realizar agendamento.'}</span>`;
@@ -306,29 +242,6 @@ async function realizarAgendamento(disponibilidadeId){
 // ==========================================
 async function carregarMeusAgendamentos(){
     const divAgendamentos = document.getElementById('listaMeusAgendamentos');
-    if (!isAutenticado) {
-        divAgendamentos.innerHTML = `
-            <div class="col-12">
-                <div class="empty-state-card">
-                    <div class="empty-icon-wrapper">
-                        <i class="bi bi-person-lock"></i>
-                    </div>
-                    <h4 class="fw-bold text-dark mb-2">Acesse sua conta para ver seus agendamentos</h4>
-                    <p class="text-muted small mb-4" style="max-width: 420px; margin: 0 auto;">
-                        Faça login ou crie uma conta gratuita para acompanhar seus horários confirmados e histórico de procedimentos.
-                    </p>
-                    <a href="index.html" class="btn btn-brand rounded-pill px-4 me-2">
-                        <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
-                    </a>
-                    <a href="cadastro.html" class="btn btn-outline-secondary rounded-pill px-4">
-                        Criar Cadastro
-                    </a>
-                </div>
-            </div>
-        `;
-        return;
-    }
-
     try {
         const response = await fetch(`${API_URL}/agendamentos/meus`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -493,23 +406,6 @@ if (formFeedback) {
 // ==========================================
 async function carregarMeusFeedbacks(){
     const divFeedbacks = document.getElementById('listaMeusFeedbacks');
-    if (!isAutenticado) {
-        divFeedbacks.innerHTML = `
-            <div class="col-12">
-                <div class="empty-state-card">
-                    <div class="empty-icon-wrapper">
-                        <i class="bi bi-star-half"></i>
-                    </div>
-                    <h4 class="fw-bold text-dark mb-2">Suas avaliações em um só lugar</h4>
-                    <p class="text-muted small mb-0" style="max-width: 420px; margin: 0 auto;">
-                        Ao concluir procedimentos práticos com alunos e professores do Senac, você poderá avaliar a experiência aqui.
-                    </p>
-                </div>
-            </div>
-        `;
-        return;
-    }
-
     try {
         const response = await fetch(`${API_URL}/feedbacks/meus`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -566,12 +462,25 @@ async function carregarMeusFeedbacks(){
     }
 }
 
-// ==========================================
-// 6. INICIALIZAÇÃO
-// ==========================================
+// Navegação de Retorno para Administrador ou Profissional
 document.addEventListener('DOMContentLoaded', () => {
-    configurarInterfaceUsuario();
-    carregarCursos();
-    carregarMeusAgendamentos();
-    carregarMeusFeedbacks();
-});
+    if(token) {
+        try {
+            const payloadToken = JSON.parse(atob(token.split('.')[1]));
+            const navbar = document.querySelector('.navbar-nav');
+
+            if (payloadToken.perfil === 'admin' || payloadToken.perfil === 'coordenador') {
+                navbar.innerHTML += `<li class="nav-item"><a class="nav-link text-warning fw-bold" href="admin.html"><i class="bi bi-speedometer2 me-1"></i> Painel Admin</a></li>`;
+            } else if (payloadToken.perfil === 'profissional') {
+                navbar.innerHTML += `<li class="nav-item"><a class="nav-link text-warning fw-bold" href="profissional.html"><i class="bi bi-journal-text me-1"></i> Pauta do Professor</a></li>`;
+            }
+        } catch (e) {
+            console.error("Erro ao decodificar token:", e);
+        }
+    }
+});
+
+// Inicialização
+carregarCursos();
+carregarMeusAgendamentos();
+carregarMeusFeedbacks();
