@@ -3,53 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect Senac - Login</title>
+    <title>Connect Senac - Entrar na Plataforma</title>
+    
+    <!-- Bootstrap 5.3 & Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f4f7f6; }
-        .card-login { border: none; border-radius: 1rem; }
-        .btn-brand { background-color: #004a8d; color: white; border-radius: 0.5rem; padding: 0.75rem; font-weight: 600; }
-        .btn-brand:hover { background-color: #003366; color: white; }</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Connect Senac Design System Theme -->
+    <link rel="stylesheet" href="css/theme.css">
 </head>
-<body class="d-flex align-items-center py-4 bg-light vh-100">
+<body>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-5 col-xl-4">
-                <div class="card shadow-lg card-login">
-                    <div class="card-body p-5 text-center">
-                        <h2 class="fw-bold mb-2 text-uppercase" style="color: #004a8d;">Connect Senac</h2>
-                        <p class="text-muted mb-4">Insira as suas credenciais para aceder</p>
+    <div class="auth-wrapper">
+        <!-- Lado Esquerdo Institucional / Storytelling -->
+        <div class="auth-brand-side">
+            <div>
+                <div class="brand-pill mb-4">
+                    <i class="bi bi-mortarboard-fill text-warning"></i>
+                    <span>Rede de Aprendizagem Prática</span>
+                </div>
+                <h1 class="display-5 fw-bold text-white mb-3">Conectando talentos à prática real.</h1>
+                <p class="text-white-50 lead mb-0" style="max-width: 480px;">
+                    A plataforma oficial do Senac para agendamentos de procedimentos práticos, conexão entre alunos, docentes e modelos voluntários.
+                </p>
+            </div>
 
-                        <form id="formLogin">
-                            <div class="form-floating mb-3 text-start">
-                                <input type="email" class="form-control rounded-3" id="email" placeholder="name@example.com" required>
-                                <label for="email">E-mail institucional ou pessoal</label>
-                            </div>
-
-                            <div class="form-floating mb-3 text-start">
-                                <input type="password" class="form-control rounded-3" id="senha" placeholder="Palavra-passe" required>
-                                <label for="senha">Palavra-passe</label>
-                            </div>
-
-                            <div class="d-flex justify-content-end mb-4">
-                                <a href="./esqueci-senha.html" class="text-decoration-none small" style="color: #004a8d;">Esqueceu a palavra-passe?</a>
-                            </div>
-
-                            <div id="mensagemErro" class="alert alert-danger d-none small text-start py-2"></div>
-
-                            <button type="submit" class="btn btn-brand w-100 mb-4">Entrar na Plataforma</button>
-                        </form>
-
-                        <div>
-                            <p class="mb-0 small">Ainda não tem conta? <a href="cadastro.html" class="text-decoration-none fw-bold" style="color: #004a8d;">Registe-se aqui</a></p>
-                        </div>
+            <div class="my-auto py-5">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-calendar-check text-warning"></i>
                     </div>
+                    <div>
+                        <h6 class="text-white mb-1 fw-bold">Agendamentos Simplificados</h6>
+                        <p class="text-white-50 small mb-0">Inscreva-se em procedimentos e acompanhe seus horários em tempo real.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check text-warning"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-white mb-1 fw-bold">Supervisão Pedagógica</h6>
+                        <p class="text-white-50 small mb-0">Atendimentos conduzidos por turmas sob orientação de instrutores Senac.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-award text-warning"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-white mb-1 fw-bold">Ambiente de Excelência</h6>
+                        <p class="text-white-50 small mb-0">Infraestrutura completa com padrões de qualidade e biossegurança.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-white-50 small d-flex justify-content-between align-items-center pt-3 border-top border-white-10">
+                <span>© Connect Senac</span>
+                <span>Educação Profissional de Qualidade</span>
+            </div>
+        </div>
+
+        <!-- Lado Direito Formulário de Login -->
+        <div class="auth-content-side">
+            <div class="auth-card">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-3" style="background-color: var(--senac-blue-light); color: var(--senac-blue); width: 64px; height: 64px;">
+                        <i class="bi bi-person-fill-lock fs-2"></i>
+                    </div>
+                    <h2 class="fw-bold mb-1" style="color: var(--senac-blue);">Connect Senac</h2>
+                    <p class="text-muted small">Insira suas credenciais para acessar sua conta</p>
+                </div>
+
+                <form id="formLogin">
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="email" placeholder="nome@exemplo.com" required autocomplete="email">
+                        <label for="email"><i class="bi bi-envelope me-1"></i> E-mail institucional ou pessoal</label>
+                    </div>
+
+                    <div class="form-floating mb-2 input-icon-wrapper">
+                        <input type="password" class="form-control" id="senha" placeholder="Sua senha" required autocomplete="current-password">
+                        <label for="senha"><i class="bi bi-lock me-1"></i> Senha</label>
+                        <button type="button" class="password-toggle-btn" id="btnToggleSenha" aria-label="Mostrar ou ocultar senha">
+                            <i class="bi bi-eye" id="iconToggleSenha"></i>
+                        </button>
+                    </div>
+
+                    <div class="d-flex justify-content-end mb-4">
+                        <a href="esqueci-senha.html" class="text-decoration-none small fw-semibold" style="color: var(--senac-blue);">
+                            Esqueceu a senha?
+                        </a>
+                    </div>
+
+                    <div id="mensagemErro" class="alert alert-danger d-none small py-2 px-3 mb-3 rounded-3" role="alert"></div>
+
+                    <button type="submit" class="btn btn-brand w-100 py-3 mb-4" id="btnEntrar">
+                        <span>Entrar na Plataforma</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="text-center pt-3 border-top">
+                    <p class="mb-0 small text-muted">
+                        Ainda não tem cadastro? 
+                        <a href="cadastro.html" class="text-decoration-none fw-bold" style="color: var(--senac-orange);">
+                            Cadastre-se gratuitamente
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/auth.js"></script>
 </body>
 </html>

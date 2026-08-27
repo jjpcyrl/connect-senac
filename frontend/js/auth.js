@@ -6,18 +6,68 @@ const API_URL =
     ? FALLBACK_BASE_URL
     : `${window.location.origin}/api/usuarios`;
 
+// Toggle de Visibilidade de Senha
+const btnToggleSenha = document.getElementById("btnToggleSenha");
+if (btnToggleSenha) {
+  btnToggleSenha.addEventListener("click", () => {
+    const inputSenha = document.getElementById("senha");
+    const iconToggle = document.getElementById("iconToggleSenha");
+    if (!inputSenha || !iconToggle) return;
+
+    if (inputSenha.type === "password") {
+      inputSenha.type = "text";
+      iconToggle.classList.remove("bi-eye");
+      iconToggle.classList.add("bi-eye-slash");
+    } else {
+      inputSenha.type = "password";
+      iconToggle.classList.remove("bi-eye-slash");
+      iconToggle.classList.add("bi-eye");
+    }
+  });
+}
+
+// Máscara de Telefone / Celular (BR)
+const inputTelefone = document.getElementById("telefone");
+if (inputTelefone) {
+  inputTelefone.addEventListener("input", (e) => {
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.length > 11) value = value.slice(0, 11);
+
+    if (value.length > 10) {
+      // Formato com 9 dígitos: (11) 99999-9999
+      e.target.value = value.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+    } else if (value.length > 6) {
+      // Formato parcial: (11) 9999-9999
+      e.target.value = value.replace(/^(\d{2})(\d{4})(\d{0,4})$/, "($1) $2-$3");
+    } else if (value.length > 2) {
+      e.target.value = value.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
+    } else {
+      e.target.value = value;
+    }
+  });
+}
+
 // Lógica de Login
 const formLogin = document.getElementById("formLogin");
 if (formLogin) {
   formLogin.addEventListener("submit", async (e) => {
-    e.preventDefault(); // Evita que a página recarregue ao submeter o formulário
+    e.preventDefault();
 
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const senha = document.getElementById("senha").value;
     const msgErro = document.getElementById("mensagemErro");
+    const btnEntrar = document.getElementById("btnEntrar");
+
+    const originalBtnText = btnEntrar ? btnEntrar.innerHTML : "";
+    if (btnEntrar) {
+      btnEntrar.disabled = true;
+      btnEntrar.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <span>Autenticando...</span>
+      `;
+    }
 
     try {
-      // Fazendo a requisição POST para o Back-end
       const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -30,61 +80,70 @@ if (formLogin) {
         if (msgErro) msgErro.classList.add("d-none");
         localStorage.setItem("token", data.token);
 
-        // Redirecionamento Inteligente baseado no Perfil (RBAC)
-        const perfil = data.utilizador.perfil;
+        // Redirecionamento RBAC
+        const perfil = data.utilizador ? data.utilizador.perfil : data.usuario?.perfil;
 
         if (perfil === "admin" || perfil === "coordenador") {
           window.location.href = "admin.html";
         } else if (perfil === "profissional") {
           window.location.href = "profissional.html";
         } else {
-          window.location.href = "painel.html"; // Candidato/Modelo
+          window.location.href = "painel.html";
         }
       } else {
         if (msgErro) {
-          msgErro.textContent = data.erro || "Falha ao autenticar.";
+          msgErro.textContent = data.erro || "Credenciais inválidas. Verifique seu e-mail e senha.";
           msgErro.classList.remove("d-none");
         }
       }
     } catch (error) {
       console.error("Erro na requisição:", error);
       if (msgErro) {
-        msgErro.textContent = "Erro de ligação ao servidor.";
+        msgErro.textContent = "Erro de conexão com o servidor. Tente novamente.";
         msgErro.classList.remove("d-none");
+      }
+    } finally {
+      if (btnEntrar) {
+        btnEntrar.disabled = false;
+        btnEntrar.innerHTML = originalBtnText;
       }
     }
   });
 }
 
-// Lógica de Registo
+// Lógica de Cadastro
 const formCadastro = document.getElementById("formCadastro");
 if (formCadastro) {
   formCadastro.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const nome = document.getElementById("nome").value;
-    const email = document.getElementById("email").value;
-    const telefone = document.getElementById("telefone").value;
+    const nome = document.getElementById("nome").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
     const senha = document.getElementById("senha").value;
-    const confirmar_senha = document.getElementById("confirmar_senha").value; // Captura o novo campo
+    const confirmar_senha = document.getElementById("confirmar_senha").value;
 
-    const consentimento_termos = document.getElementById("termoUso").checked
-      ? 1
-      : 0;
-    const consentimento_imagem = document.getElementById("termoImagem").checked
-      ? 1
-      : 0;
+    const consentimento_termos = document.getElementById("termoUso").checked ? 1 : 0;
+    const consentimento_imagem = document.getElementById("termoImagem").checked ? 1 : 0;
 
     const msgDiv = document.getElementById("mensagemCadastro");
+    const btnCadastrar = document.getElementById("btnCadastrar");
 
-    // [NOVIDADE V2] Validação no Front-end (Client-Side Validation)
     if (senha !== confirmar_senha) {
-      msgDiv.innerHTML = `<span class="text-danger fw-bold">Erro: As palavras-passe não coincidem. Verifique a digitação.</span>`;
-      return; // O comando 'return' para a execução aqui, impedindo o 'fetch' abaixo.
+      msgDiv.innerHTML = `<div class="alert alert-danger py-2 px-3 rounded-3">As senhas não coincidem. Verifique a digitação.</div>`;
+      return;
+    }
+
+    const originalBtnText = btnCadastrar ? btnCadastrar.innerHTML : "";
+    if (btnCadastrar) {
+      btnCadastrar.disabled = true;
+      btnCadastrar.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <span>Criando conta...</span>
+      `;
     }
 
     try {
-      // Se as senhas forem iguais, enviamos o payload completo para o Back-end
       const response = await fetch(`${API_URL}/registrar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -102,29 +161,46 @@ if (formCadastro) {
       const data = await response.json();
 
       if (response.ok) {
-        msgDiv.innerHTML = `<span class="text-success fw-bold">Conta criada com sucesso! A redirecionar para o login...</span>`;
+        msgDiv.innerHTML = `
+          <div class="alert alert-success py-2 px-3 rounded-3">
+            <i class="bi bi-check-circle-fill me-1"></i> Conta criada com sucesso! Redirecionando para o login...
+          </div>
+        `;
         setTimeout(() => {
           window.location.href = "index.html";
-        }, 2000);
+        }, 1800);
       } else {
-        msgDiv.innerHTML = `<span class="text-danger fw-bold">${data.erro}</span>`;
+        msgDiv.innerHTML = `<div class="alert alert-danger py-2 px-3 rounded-3">${data.erro || "Erro ao cadastrar."}</div>`;
       }
     } catch (error) {
       console.error("Erro na requisição:", error);
-      msgDiv.innerHTML = `<span class="text-danger fw-bold">Erro de conexão com o servidor.</span>`;
+      msgDiv.innerHTML = `<div class="alert alert-danger py-2 px-3 rounded-3">Erro de conexão com o servidor.</div>`;
+    } finally {
+      if (btnCadastrar) {
+        btnCadastrar.disabled = false;
+        btnCadastrar.innerHTML = originalBtnText;
+      }
     }
   });
 }
 
-// Lógica de Solicitar Recuperação
+// Lógica de Solicitar Recuperação de Senha
 const formEsqueci = document.getElementById("formEsqueci");
 if (formEsqueci) {
   formEsqueci.addEventListener("submit", async (e) => {
     e.preventDefault();
     const msgDiv = document.getElementById("msgRecuperacao");
-    const email = document.getElementById("emailRecuperacao").value;
+    const email = document.getElementById("emailRecuperacao").value.trim();
+    const btnEnviar = document.getElementById("btnEnviarRecuperacao");
 
-    msgDiv.innerHTML = '<span class="text-primary">A processar...</span>';
+    const originalBtnText = btnEnviar ? btnEnviar.innerHTML : "";
+    if (btnEnviar) {
+      btnEnviar.disabled = true;
+      btnEnviar.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <span>Enviando...</span>
+      `;
+    }
 
     try {
       const response = await fetch(`${API_URL}/esqueci-senha`, {
@@ -133,10 +209,14 @@ if (formEsqueci) {
         body: JSON.stringify({ email }),
       });
       const data = await response.json();
-      msgDiv.innerHTML = `<span class="text-success">${data.mensagem}</span>`;
-      // DICA PARA TESTE LOCAL: O link será impresso no terminal do VS Code onde roda o Node!
+      msgDiv.innerHTML = `<div class="alert alert-success py-2 px-3 rounded-3">${data.mensagem || "Instruções enviadas com sucesso!"}</div>`;
     } catch (error) {
-      msgDiv.innerHTML = '<span class="text-danger">Erro de conexão.</span>';
+      msgDiv.innerHTML = '<div class="alert alert-danger py-2 px-3 rounded-3">Erro de conexão com o servidor.</div>';
+    } finally {
+      if (btnEnviar) {
+        btnEnviar.disabled = false;
+        btnEnviar.innerHTML = originalBtnText;
+      }
     }
   });
 }
@@ -149,21 +229,28 @@ if (formRedefinir) {
     const msgDiv = document.getElementById("msgRedefinir");
     const nova_senha = document.getElementById("novaSenha").value;
     const confirmar_senha = document.getElementById("confirmarNovaSenha").value;
+    const btnSalvar = document.getElementById("btnSalvarNovaSenha");
 
-    // Capturar o token da URL (ex: ?token=abc123xyz)
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
 
     if (!token) {
-      msgDiv.innerHTML =
-        '<span class="text-danger">Link de recuperação inválido (Token ausente).</span>';
+      msgDiv.innerHTML = '<div class="alert alert-danger py-2 px-3 rounded-3">Link de recuperação inválido (Token ausente).</div>';
       return;
     }
 
     if (nova_senha !== confirmar_senha) {
-      msgDiv.innerHTML =
-        '<span class="text-danger">As palavras-passe não coincidem.</span>';
+      msgDiv.innerHTML = '<div class="alert alert-danger py-2 px-3 rounded-3">As senhas não coincidem.</div>';
       return;
+    }
+
+    const originalBtnText = btnSalvar ? btnSalvar.innerHTML : "";
+    if (btnSalvar) {
+      btnSalvar.disabled = true;
+      btnSalvar.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <span>Atualizando...</span>
+      `;
     }
 
     try {
@@ -176,13 +263,18 @@ if (formRedefinir) {
       const data = await response.json();
 
       if (response.ok) {
-        msgDiv.innerHTML = `<span class="text-success">${data.mensagem} A redirecionar...</span>`;
-        setTimeout(() => (window.location.href = "index.html"), 3000);
+        msgDiv.innerHTML = `<div class="alert alert-success py-2 px-3 rounded-3">${data.mensagem || "Senha atualizada com sucesso!"} Redirecionando...</div>`;
+        setTimeout(() => (window.location.href = "index.html"), 2500);
       } else {
-        msgDiv.innerHTML = `<span class="text-danger">${data.erro}</span>`;
+        msgDiv.innerHTML = `<div class="alert alert-danger py-2 px-3 rounded-3">${data.erro || "Falha ao redefinir senha."}</div>`;
       }
     } catch (error) {
-      msgDiv.innerHTML = '<span class="text-danger">Erro de conexão.</span>';
+      msgDiv.innerHTML = '<div class="alert alert-danger py-2 px-3 rounded-3">Erro de conexão com o servidor.</div>';
+    } finally {
+      if (btnSalvar) {
+        btnSalvar.disabled = false;
+        btnSalvar.innerHTML = originalBtnText;
+      }
     }
   });
 }

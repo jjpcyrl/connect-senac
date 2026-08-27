@@ -4,87 +4,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connect Senac - Criar Conta</title>
+    
+    <!-- Bootstrap 5.3 & Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f4f7f6; }
-        .card-cadastro { border: none; border-radius: 1rem; }
-        .btn-brand { background-color: #004a8d; color: white; border-radius: 0.5rem; padding: 0.75rem; font-weight: 600; }
-        .btn-brand:hover { background-color: #003366; color: white; }
-        .form-floating > label { font-size: 0.9rem; }</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Connect Senac Design System Theme -->
+    <link rel="stylesheet" href="css/theme.css">
 </head>
-<body class="py-5">
+<body>
 
-    <div class="container d-flex justify-content-center mt-4">
-        <div class="col-12 col-lg-8 col-xl-6">
-            <div class="card shadow-lg card-cadastro">
-                <div class="card-body p-4 p-md-5">
-                    <h3 class="text-center fw-bold mb-4" style="color: #004a8d;">Criar Nova Conta</h3>
+    <div class="auth-wrapper">
+        <!-- Lado Esquerdo Institucional -->
+        <div class="auth-brand-side">
+            <div>
+                <div class="brand-pill mb-4">
+                    <i class="bi bi-person-plus-fill text-warning"></i>
+                    <span>Novo Cadastro</span>
+                </div>
+                <h1 class="display-5 fw-bold text-white mb-3">Faça parte da nossa comunidade.</h1>
+                <p class="text-white-50 lead mb-0" style="max-width: 480px;">
+                    Cadastre-se como modelo voluntário e tenha acesso a atendimentos práticos de beleza, estética, saúde e bem-estar.
+                </p>
+            </div>
 
-                    <form id="formCadastro">
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control rounded-3" id="nome" placeholder="Nome Completo" required>
-                            <label for="nome">Nome Completo</label>
-                        </div>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="email" class="form-control rounded-3" id="email" placeholder="E-mail" required>
-                                    <label for="email">E-mail</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="tel" class="form-control rounded-3" id="telefone" placeholder="Telefone" required>
-                                    <label for="telefone">Telefone (WhatsApp)</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="password" class="form-control rounded-3" id="senha" placeholder="Palavra-passe" required>
-                                    <label for="senha">Palavra-passe</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="password" class="form-control rounded-3" id="confirmar_senha" placeholder="Confirmar Palavra-passe" required>
-                                    <label for="confirmar_senha">Confirmar Palavra-passe</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-3 bg-light rounded-3 mb-4 border">
-                            <h6 class="fw-bold mb-3 text-secondary">Privacidade e Termos (LGPD)</h6>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="termoUso" required>
-                                <label class="form-check-label small" for="termoUso">
-                                    Li e aceito os <a href="#" class="text-decoration-none">Termos de Uso</a> e a <a href="#" class="text-decoration-none">Política de Privacidade</a>.*
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="termoImagem">
-                                <label class="form-check-label small text-muted" for="termoImagem">
-                                    Autorizo o uso de imagens dos procedimentos realizados para o portfólio académico da turma (Opcional).
-                                </label>
-                            </div>
-                        </div>
-
-                        <div id="mensagemCadastro" class="mb-3 text-center"></div>
-
-                        <button type="submit" class="btn btn-brand w-100">Finalizar Registo</button>
-                    </form>
-
-                    <div class="text-center mt-4">
-                        <a href="index.html" class="text-decoration-none text-muted small">Já tem uma conta? <span class="fw-bold" style="color: #004a8d;">Faça Login</span></a>
+            <div class="my-auto py-4">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-check2-circle text-warning"></i>
                     </div>
+                    <div>
+                        <h6 class="text-white mb-1 fw-bold">Procedimentos Supervisionados</h6>
+                        <p class="text-white-50 small mb-0">Atendimentos conduzidos por turmas técnicas com instrutores dedicados.</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-bell text-warning"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-white mb-1 fw-bold">Alertas de Vagas Abertas</h6>
+                        <p class="text-white-50 small mb-0">Receba notificações antecipadas quando novas vagas estiverem disponíveis.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-white-50 small d-flex justify-content-between align-items-center pt-3 border-top border-white-10">
+                <span>© Connect Senac</span>
+                <a href="index.html" class="text-white text-decoration-none fw-semibold">
+                    <i class="bi bi-arrow-left me-1"></i> Já tenho conta
+                </a>
+            </div>
+        </div>
+
+        <!-- Lado Direito Formulário de Cadastro -->
+        <div class="auth-content-side py-4">
+            <div class="auth-card" style="max-width: 540px;">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-3" style="background-color: var(--senac-orange-light); color: var(--senac-orange); width: 60px; height: 60px;">
+                        <i class="bi bi-person-badge fs-2"></i>
+                    </div>
+                    <h2 class="fw-bold mb-1" style="color: var(--senac-blue);">Criar Nova Conta</h2>
+                    <p class="text-muted small">Preencha seus dados para começar a agendar</p>
+                </div>
+
+                <form id="formCadastro">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="nome" placeholder="Nome Completo" required autocomplete="name">
+                        <label for="nome"><i class="bi bi-person me-1"></i> Nome Completo</label>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" placeholder="E-mail" required autocomplete="email">
+                                <label for="email"><i class="bi bi-envelope me-1"></i> E-mail</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="telefone" placeholder="(00) 00000-0000" required autocomplete="tel">
+                                <label for="telefone"><i class="bi bi-whatsapp me-1"></i> WhatsApp / Celular</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating input-icon-wrapper">
+                                <input type="password" class="form-control" id="senha" placeholder="Senha" required autocomplete="new-password">
+                                <label for="senha"><i class="bi bi-lock me-1"></i> Senha</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating input-icon-wrapper">
+                                <input type="password" class="form-control" id="confirmar_senha" placeholder="Confirmar Senha" required autocomplete="new-password">
+                                <label for="confirmar_senha"><i class="bi bi-lock-fill me-1"></i> Confirmar Senha</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Termos e LGPD -->
+                    <div class="p-3 bg-light rounded-3 mb-4 border border-light-subtle">
+                        <h6 class="fw-bold mb-2 small text-dark d-flex align-items-center gap-1">
+                            <i class="bi bi-shield-lock-fill text-primary"></i> Privacidade e Termos (LGPD)
+                        </h6>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="termoUso" required>
+                            <label class="form-check-label small text-muted" for="termoUso">
+                                Li e concordo com os <a href="#" class="text-decoration-none fw-semibold" style="color: var(--senac-blue);">Termos de Uso</a> e a <a href="#" class="text-decoration-none fw-semibold" style="color: var(--senac-blue);">Política de Privacidade</a>.*
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="termoImagem">
+                            <label class="form-check-label small text-muted" for="termoImagem">
+                                Autorizo o uso de imagens dos procedimentos realizados para fins pedagógicos da turma (Opcional).
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="mensagemCadastro" class="mb-3 text-center small"></div>
+
+                    <button type="submit" class="btn btn-orange w-100 py-3 mb-3" id="btnCadastrar">
+                        <span>Finalizar Cadastro</span>
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                </form>
+
+                <div class="text-center pt-3 border-top">
+                    <p class="mb-0 small text-muted">
+                        Já possui uma conta? 
+                        <a href="index.html" class="text-decoration-none fw-bold" style="color: var(--senac-blue);">
+                            Entrar no Connect Senac
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/auth.js"></script>
 </body>
 </html>
