@@ -8,9 +8,9 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const autorizarPerfis = require('../middlewares/rbacMiddleware');
 
 // ----------------------------------------------------------------------
-// Rota Aberta para Logados: Qualquer um com token pode ver a vitrine
+// Rota Pública: Qualquer visitante pode ver a vitrine de cursos e procedimentos
 // ----------------------------------------------------------------------
-router.get('/ativos', authMiddleware, cursoController.listarAtivos);
+router.get('/ativos', cursoController.listarAtivos);
 // Apenas Admin e Coordenador podem alterar ou arquivar os cursos
 router.get('/admin', authMiddleware, autorizarPerfis('admin', 'coordenador'), cursoController.listarTodosAdmin);
 

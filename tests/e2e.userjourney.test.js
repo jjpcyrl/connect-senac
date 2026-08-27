@@ -1044,13 +1044,31 @@ describe('🚀 [USER JOURNEY E2E SUITE] Execução de Todos os Cenários (TC-01 
     // MÓDULO 7 — SEGURANÇA E SESSÃO (TC-39 a TC-42)
     // =========================================================================
     describe('MÓDULO 7 — SEGURANÇA E SESSÃO', () => {
-        test('TC-39 | EC  | Chamada à API /cursos/ativos sem token → 401 Unauthorized', async () => {
+        test('TC-39 | PUBLIC | Chamada à API /cursos/ativos sem token é pública e permitida', async () => {
+            supabase.from.mockImplementation((table) => {
+                if (table === 'cursos') {
+                    return {
+                        select: () => ({
+                            eq: () => ({
+                                order: async () => ({ data: [{ id: 'curso-1', nome: 'Barbearia' }], error: null })
+                            })
+                        })
+                    };
+                }
+            });
+
             const res = await request(app).get('/api/cursos/ativos');
+            expect(res.status).toBe(200);
+            expect(Array.isArray(res.body)).toBe(true);
+        });
+
+        test('TC-39b | EC  | Chamada à API privada /agendamentos/meus sem token → 401 Unauthorized', async () => {
+            const res = await request(app).get('/api/agendamentos/meus');
             expect(res.status).toBe(401);
             expect(res.body.erro).toMatch(/Acesso negado/i);
         });
 
-        test('TC-40 | EC  | Chamada à API com token expirado (manipulado) → 401 Unauthorized', async () => {
+        test('TC-40 | EC  | Chamada à API privada com token expirado → 401 Unauthorized', async () => {
             const tokenExpirado = jwt.sign(
                 { id: 'user-1', email: 'expirado@senac.com', perfil: 'candidato' },
                 JWT_SECRET,
@@ -1058,7 +1076,7 @@ describe('🚀 [USER JOURNEY E2E SUITE] Execução de Todos os Cenários (TC-01 
             );
 
             const res = await request(app)
-                .get('/api/cursos/ativos')
+                .get('/api/agendamentos/meus')
                 .set('Authorization', `Bearer ${tokenExpirado}`);
 
             expect(res.status).toBe(401);
