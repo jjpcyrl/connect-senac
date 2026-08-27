@@ -8,6 +8,11 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const autorizarPerfis = require('../middlewares/rbacMiddleware');
 
 // ----------------------------------------------------------------------
+// Rota Pública para Visitantes (Página Pública de Cursos)
+// ----------------------------------------------------------------------
+router.get('/publicos', cursoController.listarAtivos);
+
+// ----------------------------------------------------------------------
 // Rota Aberta para Logados: Qualquer um com token pode ver a vitrine
 // ----------------------------------------------------------------------
 router.get('/ativos', authMiddleware, cursoController.listarAtivos);

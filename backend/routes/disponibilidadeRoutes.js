@@ -6,6 +6,9 @@ const disponibilidadeController = require('../controllers/disponibilidadeControl
 const authMiddleware = require('../middlewares/authMiddleware');
 const autorizarPerfis = require('../middlewares/rbacMiddleware');
 
+// Rota Pública: Visitantes podem consultar os horários na página pública
+router.get('/publicas/curso/:curso_id', disponibilidadeController.listarPorCurso);
+
 // Qualquer usuário logado pode ver os horários de um curso específico
 router.get('/curso/:curso_id', authMiddleware, disponibilidadeController.listarPorCurso);
 

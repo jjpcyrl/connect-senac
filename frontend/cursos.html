@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cursos Práticos e Vagas para Modelos — Connect Senac</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/theme.css">
+    <style>
+        .hero-public-courses {
+            background: linear-gradient(135deg, #004587 0%, #002b54 100%);
+            border-radius: 1.5rem;
+            padding: 3.5rem 2rem;
+            color: #ffffff;
+            margin-bottom: 3rem;
+            box-shadow: 0 15px 35px rgba(0, 75, 147, 0.18);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-public-courses::after {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -10%;
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(247, 148, 29, 0.25) 0%, rgba(247, 148, 29, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .card-curso-publico {
+            border: 1px solid #e9ecef;
+            border-radius: 1.25rem;
+            background: #ffffff;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .card-curso-publico:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 30px rgba(0, 75, 147, 0.12);
+            border-color: #004587;
+        }
+        .card-curso-publico .img-wrapper {
+            position: relative;
+            height: 190px;
+            overflow: hidden;
+            background-color: #f1f5f9;
+        }
+        .card-curso-publico .img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .card-curso-publico:hover .img-wrapper img {
+            transform: scale(1.05);
+        }
+        .card-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(6px);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .search-box-public {
+            background: #ffffff;
+            border-radius: 50px;
+            padding: 6px 12px 6px 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .search-box-public input {
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+        .badge-vaga {
+            background-color: #e6f4ea;
+            color: #137333;
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <!-- Header / Navbar Pública -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-senac sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="cursos.html">
+                <span class="bg-white text-primary rounded-3 px-2 py-1 fs-6 fw-bold" style="color: var(--senac-blue) !important;">S</span>
+                <span class="fw-bold">Connect Senac</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                <ul class="navbar-nav ms-lg-4 gap-2">
+                    <li class="nav-item">
+                        <a class="nav-link active fw-semibold" href="cursos.html"><i class="bi bi-grid-fill me-1"></i> Catálogo de Cursos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#como-funciona"><i class="bi bi-info-circle me-1"></i> Como Funciona</a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                    <a href="index.html" class="btn btn-outline-light btn-sm px-3 rounded-pill d-flex align-items-center gap-1">
+                        <i class="bi bi-box-arrow-in-right"></i> Entrar
+                    </a>
+                    <a href="cadastro.html" class="btn btn-warning btn-sm px-3 rounded-pill fw-bold text-dark d-flex align-items-center gap-1" style="background-color: var(--senac-orange); border-color: var(--senac-orange); color: #fff !important;">
+                        <i class="bi bi-person-plus-fill"></i> Cadastre-se Grátis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="container py-4 py-lg-5">
+
+        <!-- Hero Section -->
+        <section class="hero-public-courses text-center text-lg-start">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3 shadow-sm" style="background-color: var(--senac-orange) !important; color: #fff !important;">
+                        <i class="bi bi-stars me-1"></i> Atendimentos Gratuitos e Práticos
+                    </span>
+                    <h1 class="display-6 fw-bold mb-3">Conheça os Cursos Práticos do Senac</h1>
+                    <p class="lead text-white-50 mb-4" style="font-size: 1.05rem; max-width: 650px;">
+                        Descubra todos os cursos com procedimentos práticos disponíveis. Participe como <strong>modelo voluntário</strong>, receba cuidados especializados de alunos supervisionados por professores e contribua com a formação profissional.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-lg-start">
+                        <a href="#vitrine" class="btn btn-light px-4 py-2 rounded-pill fw-bold text-primary shadow-sm">
+                            <i class="bi bi-arrow-down-circle me-1"></i> Explorar Catálogo
+                        </a>
+                        <a href="cadastro.html" class="btn btn-outline-light px-4 py-2 rounded-pill">
+                            Criar Conta de Modelo
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center d-none d-lg-block">
+                    <div class="p-4 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-25 text-white">
+                        <i class="bi bi-mortarboard-fill display-3 text-warning mb-2" style="color: var(--senac-orange) !important;"></i>
+                        <h4 class="h5 fw-bold mb-1">Ensino de Excelência</h4>
+                        <p class="small text-white-50 mb-0">Cursos de Estética, Barbearia, Saúde, Beleza e muito mais.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vitrine de Cursos -->
+        <section id="vitrine" class="mb-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <div>
+                    <h2 class="h4 fw-bold text-dark mb-1">Cursos Abertos para Modelos</h2>
+                    <p class="text-muted small mb-0">Clique em qualquer curso para ver a descrição completa, restrições e horários de aula.</p>
+                </div>
+                
+                <!-- Barra de Busca Rápida -->
+                <div class="search-box-public d-flex align-items-center" style="min-width: 280px;">
+                    <i class="bi bi-search text-muted me-2"></i>
+                    <input type="text" id="inputBusca" class="form-control form-control-sm" placeholder="Buscar por curso, área ou local...">
+                </div>
+            </div>
+
+            <!-- Grid de Cursos -->
+            <div id="listaCursosPublicos" class="row g-4">
+                <!-- Preenchido dinamicamente via cursos.js -->
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando cursos...</span>
+                    </div>
+                    <p class="text-muted small mt-2">Carregando catálogo de cursos do Senac...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Informativa: Como Funciona -->
+        <section id="como-funciona" class="my-5 p-4 p-lg-5 bg-white rounded-4 border shadow-sm">
+            <div class="text-center max-w-700 mx-auto mb-5">
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-semibold mb-2">Passo a Passo</span>
+                <h3 class="fw-bold text-dark">Como Funciona a Participação como Modelo?</h3>
+                <p class="text-muted small">É 100% gratuito e você ajuda alunos a desenvolverem suas habilidades práticas com segurança.</p>
+            </div>
+
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle mb-3" style="width: 60px; height: 60px;">
+                            <i class="bi bi-search fs-4"></i>
+                        </div>
+                        <h4 class="h6 fw-bold">1. Escolha o Curso</h4>
+                        <p class="text-muted small">Navegue pelas opções disponíveis de corte, estética, massoterapia, maquiagem e mais.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-warning-subtle text-warning rounded-circle mb-3" style="width: 60px; height: 60px;">
+                            <i class="bi bi-person-check-fill fs-4" style="color: var(--senac-orange);"></i>
+                        </div>
+                        <h4 class="h6 fw-bold">2. Crie sua Conta / Faça Login</h4>
+                        <p class="text-muted small">Cadastre-se rapidamente com seu e-mail para reservar sua vaga com segurança.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success-subtle text-success rounded-circle mb-3" style="width: 60px; height: 60px;">
+                            <i class="bi bi-calendar2-heart fs-4"></i>
+                        </div>
+                        <h4 class="h6 fw-bold">3. Compareça no Horário</h4>
+                        <p class="text-muted small">Compareça na unidade Senac no dia marcado e aproveite o procedimento gratuito com supervisão pedagógica.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Detalhes do Curso -->
+    <div class="modal fade" id="modalDetalhesCurso" tabindex="-1" aria-labelledby="detalheCursoNome" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content overflow-hidden border-0 shadow-lg" style="border-radius: 1.25rem;">
+                <div class="position-relative" style="height: 240px; background-color: #0f172a;">
+                    <img id="detalheCursoImagem" src="" alt="Imagem do Curso" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.85;">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 shadow-sm bg-dark p-2 rounded-circle" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <div class="position-absolute bottom-0 start-0 p-4 text-white" style="background: linear-gradient(transparent, rgba(0,0,0,0.8)); width: 100%;">
+                        <span class="badge bg-warning text-dark mb-1" id="detalheCursoLocal">Unidade Senac</span>
+                        <h3 class="h4 fw-bold mb-0 text-white" id="detalheCursoNome">Nome do Curso</h3>
+                    </div>
+                </div>
+                <div class="modal-body p-4 p-lg-5">
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <div class="mb-4">
+                                <h4 class="h6 fw-bold text-dark mb-2">Sobre este curso e procedimento</h4>
+                                <p class="text-secondary small mb-0" id="detalheCursoDescricao" style="line-height: 1.7;"></p>
+                            </div>
+
+                            <div class="p-3 bg-light rounded-3 mb-4" id="blocoRestricoes">
+                                <h4 class="h6 fw-bold text-danger mb-1 d-flex align-items-center gap-1">
+                                    <i class="bi bi-shield-exclamation"></i> Requisitos e Restrições para o Modelo
+                                </h4>
+                                <p class="small text-muted mb-0" id="detalheCursoRestricoes"></p>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-white">
+                                <i class="bi bi-person-badge-fill fs-2 text-primary"></i>
+                                <div>
+                                    <div class="small text-muted">Professor / Instrutor Responsável</div>
+                                    <div class="fw-bold text-dark" id="detalheCursoProf">Docente Senac</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5 border-start-lg">
+                            <h4 class="h6 fw-bold text-dark mb-3">Avaliações de Modelos Anteriores</h4>
+                            <div id="detalheCursoAvaliacoes" style="max-height: 250px; overflow-y: auto;">
+                                <!-- Carregado via JS -->
+                            </div>
+
+                            <div class="mt-4 pt-3 border-top">
+                                <button type="button" class="btn btn-brand w-100 py-3 shadow-sm d-flex align-items-center justify-content-center gap-2" id="btnIrParaHorarios">
+                                    <i class="bi bi-calendar2-check"></i>
+                                    <span>Ver Horários e Vagas</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Horários e Candidatura -->
+    <div class="modal fade" id="modalHorariosCurso" tabindex="-1" aria-labelledby="modalCursoNome" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-3 p-lg-4 rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 mb-1 small fw-semibold">Horários Disponíveis</span>
+                        <h3 class="h5 fw-bold mb-0 text-dark" id="modalCursoNome">Escolha o seu Horário</h3>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <p class="text-muted small mb-3">Selecione uma das turmas práticas abaixo para participar como modelo voluntário:</p>
+                    
+                    <div class="mb-4">
+                        <label for="selectHorarios" class="form-label fw-bold small text-dark">Data e Horário do Procedimento:</label>
+                        <select class="form-select py-2" id="selectHorarios">
+                            <option value="" disabled selected>Buscando turmas...</option>
+                        </select>
+                    </div>
+
+                    <div id="msgHorarios" class="small mb-3 text-center"></div>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-brand py-3 fw-bold d-flex align-items-center justify-content-center gap-2" id="btnCandidatarVaga">
+                            <i class="bi bi-check2-circle fs-5"></i>
+                            <span>Garantir Minha Vaga</span>
+                        </button>
+                        <button type="button" class="btn btn-light py-2 small text-muted" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Login / Cadastro Necessário (Ao tentar agendar) -->
+    <div class="modal fade" id="modalLoginNecessario" tabindex="-1" aria-labelledby="modalLoginTitulo" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4 p-lg-5 rounded-4 border-0 shadow-lg">
+                <div class="mb-3">
+                    <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle shadow-sm" style="background-color: #e0f2fe; color: #004587; width: 75px; height: 75px;">
+                        <i class="bi bi-person-lock fs-1"></i>
+                    </div>
+                </div>
+                <h3 class="h4 fw-bold mb-2 text-dark" id="modalLoginTitulo">Identifique-se para Confirmar</h3>
+                <p class="text-muted small mb-4" style="line-height: 1.6;">
+                    Para garantir o seu agendamento gratuito como modelo voluntário neste procedimento do Senac, você precisa estar conectado à sua conta.
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="index.html" class="btn btn-brand py-3 fs-6 d-flex align-items-center justify-content-center gap-2" id="btnAcessarLogin">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>Já tenho conta: Fazer Login</span>
+                    </a>
+                    <a href="cadastro.html" class="btn btn-warning py-3 fs-6 fw-bold text-dark d-flex align-items-center justify-content-center gap-2" style="background-color: var(--senac-orange); border-color: var(--senac-orange); color: #fff !important;">
+                        <i class="bi bi-person-plus-fill"></i>
+                        <span>Não tenho conta: Criar Cadastro Grátis</span>
+                    </a>
+                    <button type="button" class="btn btn-link text-secondary text-decoration-none small mt-2" data-bs-dismiss="modal">
+                        Continuar visualizando outros cursos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-top py-4 text-center text-muted small mt-5">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                <div>
+                    <strong>Connect Senac</strong> — Plataforma de Conexão Pedagógica e Modelos Voluntários.
+                </div>
+                <div>
+                    <a href="index.html" class="text-decoration-none text-muted me-3">Área de Login</a>
+                    <a href="cadastro.html" class="text-decoration-none text-muted">Cadastrar-se</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Script da Página Pública -->
+    <script src="js/cursos.js"></script>
+</body>
+</html>

@@ -1050,6 +1050,23 @@ describe('🚀 [USER JOURNEY E2E SUITE] Execução de Todos os Cenários (TC-01 
             expect(res.body.erro).toMatch(/Acesso negado/i);
         });
 
+        test('TC-39-PUB | PUBLIC | Chamada à API pública /cursos/publicos responde 200 OK sem token', async () => {
+            supabase.from.mockImplementation((table) => {
+                if (table === 'cursos') {
+                    return {
+                        select: () => ({
+                            eq: () => ({
+                                order: async () => ({ data: [{ id: 'c1', nome: 'Barbearia' }], error: null })
+                            })
+                        })
+                    };
+                }
+            });
+            const res = await request(app).get('/api/cursos/publicos');
+            expect(res.status).toBe(200);
+            expect(Array.isArray(res.body)).toBe(true);
+        });
+
         test('TC-40 | EC  | Chamada à API com token expirado (manipulado) → 401 Unauthorized', async () => {
             const tokenExpirado = jwt.sign(
                 { id: 'user-1', email: 'expirado@senac.com', perfil: 'candidato' },
